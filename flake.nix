@@ -1,13 +1,10 @@
 {
-  description = "op.nix / Optimism dev environment with Nix!";
+  description = "rollup-deployments";
 
   inputs = {
-    flake-parts.url = "github:hercules-ci/flake-parts";
-
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
+    flake-parts.url = "github:hercules-ci/flake-parts";
     devshell.url = "github:numtide/devshell";
-
     foundry.url = "github:shazow/foundry.nix/stable";
 
     sops = {
@@ -34,7 +31,7 @@
       imports = [
         inputs.devshell.flakeModule
         inputs.treefmt-nix.flakeModule
-        ./nix/shell.nix
+        ./nix/devshell.nix
         ./nix/formatter.nix
         ./nix/packages
       ];
