@@ -2,39 +2,17 @@ _: {
   perSystem =
     {
       pkgs,
+      self',
       ...
     }:
     {
       devShells.default = pkgs.mkShell {
-        # packages = (with pkgs; [
-        #     foundry-bin
-        #     sops
-        #     alejandra
-        #   ]) ++ (with self'.packages; [
-        #     op-deployer
-        #   ]);
-
-        # env = [
-        #   {
-        #     name = "NIX_PATH";
-        #     value = "nixpkgs=${toString pkgs.path}";
-        #   }
-        #   {
-        #     name = "NIX_DIR";
-        #     eval = "$PRJ_ROOT/nix";
-        #   }
-        # ];
+        packages = (with pkgs; [
+            foundry-bin
+            just
+          ]) ++ (with self'.packages; [
+            op-deployer
+          ]) ++ [self'.formatter];
       };
     };
 }
-
-# { pkgs, perSystem }:
-# perSystem.devshell.mkShell {
-#   packages = [
-#     perSystem.self.formatter
-#     pkgs.just
-#   ];
-
-#   commands = [
-#   ];
-# }
