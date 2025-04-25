@@ -6,4 +6,5 @@
 **/result*
 /repl-result-out
 
-.op-deployer
+# op-deployer
+.op-deployer/
