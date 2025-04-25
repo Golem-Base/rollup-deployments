@@ -1,21 +1,40 @@
-{ pkgs, perSystem }:
-perSystem.devshell.mkShell {
-  packages = [
-    perSystem.self.formatter
-    pkgs.just
-  ];
-
-  env = [
+_: {
+  perSystem =
     {
-      name = "NIX_PATH";
-      value = "nixpkgs=${toString pkgs.path}";
-    }
+      pkgs,
+      ...
+    }:
     {
-      name = "NIX_DIR";
-      eval = "$PRJ_ROOT/nix";
-    }
-  ];
+      devShells.default = pkgs.mkShell {
+        # packages = (with pkgs; [
+        #     foundry-bin
+        #     sops
+        #     alejandra
+        #   ]) ++ (with self'.packages; [
+        #     op-deployer
+        #   ]);
 
-  commands = [
-  ];
+        # env = [
+        #   {
+        #     name = "NIX_PATH";
+        #     value = "nixpkgs=${toString pkgs.path}";
+        #   }
+        #   {
+        #     name = "NIX_DIR";
+        #     eval = "$PRJ_ROOT/nix";
+        #   }
+        # ];
+      };
+    };
 }
+
+# { pkgs, perSystem }:
+# perSystem.devshell.mkShell {
+#   packages = [
+#     perSystem.self.formatter
+#     pkgs.just
+#   ];
+
+#   commands = [
+#   ];
+# }

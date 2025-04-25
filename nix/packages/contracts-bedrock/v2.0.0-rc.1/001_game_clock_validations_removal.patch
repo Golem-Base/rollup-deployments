@@ -1,0 +1,15 @@
+diff --git a/packages/contracts-bedrock/scripts/deploy/DeployOPChain.s.sol b/packages/contracts-bedrock/scripts/deploy/DeployOPChain.s.sol
+index 9541db0bba..d72fb1e374 100644
+--- a/packages/contracts-bedrock/scripts/deploy/DeployOPChain.s.sol
++++ b/packages/contracts-bedrock/scripts/deploy/DeployOPChain.s.sol
+@@ -490,8 +490,8 @@ contract DeployOPChain is Script {
+         require(address(game.anchorStateRegistry()) == address(_doo.anchorStateRegistryProxy()), "DPG-50");
+         require(game.l2ChainId() == _doi.l2ChainId(), "DPG-60");
+         require(game.l2BlockNumber() == 0, "DPG-70");
+-        require(Duration.unwrap(game.clockExtension()) == 10800, "DPG-80");
+-        require(Duration.unwrap(game.maxClockDuration()) == 302400, "DPG-110");
++        // require(Duration.unwrap(game.clockExtension()) == 10800, "DPG-80");
++        // require(Duration.unwrap(game.maxClockDuration()) == 302400, "DPG-110");
+         require(game.splitDepth() == 30, "DPG-90");
+         require(game.maxGameDepth() == 73, "DPG-100");
+     }
