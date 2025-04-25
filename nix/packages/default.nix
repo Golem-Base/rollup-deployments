@@ -10,13 +10,11 @@
         # TODO v3.0.0 needs work
         # contracts-bedrock-v3_0_0-rc2 = callPackage ./contracts-bedrock/v3.0.0-rc.2 { };
         contracts-bedrock-v2_0_0-rc1 = callPackage ./contracts-bedrock/v2.0.0-rc.1 { };
-        contracts-bedrock-v1_7_0-beta_1_l2-contracts =
-          callPackage ./contracts-bedrock/v1.7.0-beta.1+l2-contracts
-            { };
-        op-deployer-v0_2_0-rc2 = callPackage ./op-deployer/op-deployer-v0.2.0-rc.2.nix { };
+        contracts-bedrock-v1_7_0-beta_1_l2-contracts = callPackage ./contracts-bedrock/v1.7.0-beta.1+l2-contracts { };
 
         op-deployer = op-deployer-v0_2_0-rc2;
-        op-deployer-gb = callPackage ./op-deployer/op-deployer-gb.nix { };
+        op-deployer-v0_2_0-rc2-gb = callPackage ./op-deployer/v0.2.0-rc.2-gb { };
+        op-deployer-v0_2_0-rc2 = callPackage ./op-deployer/v0.2.0-rc.2 { };
       };
 
       apps =
