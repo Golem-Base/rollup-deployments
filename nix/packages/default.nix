@@ -16,6 +16,7 @@
         op-deployer-v0_2_0-rc2 = callPackage ./op-deployer/op-deployer-v0.2.0-rc.2.nix { };
 
         op-deployer = op-deployer-v0_2_0-rc2;
+        op-deployer-gb = callPackage ./op-deployer/op-deployer-gb.nix { };
       };
 
       apps =
