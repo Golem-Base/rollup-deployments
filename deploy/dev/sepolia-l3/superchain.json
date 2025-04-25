@@ -1,0 +1,7 @@
+{
+  "SuperchainProxyAdmin": "0x6e274c33421752a0ff1de987fe946810efcffc3d",
+  "SuperchainConfigImpl": "0x4da82a327773965b8d4d85fa3db8249b387458e7",
+  "SuperchainConfigProxy": "0xe819c99658c74c728c847fbd749ceaa4c443fd85",
+  "ProtocolVersionsImpl": "0x37e15e4d6dffa9e5e320ee1ec036922e563cb76c",
+  "ProtocolVersionsProxy": "0xe2e154fe5bfd801f507e79ab6a95da6737702b68"
+}
