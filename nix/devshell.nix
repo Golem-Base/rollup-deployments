@@ -5,7 +5,7 @@ _: {
     inputs',
     ...
   }: {
-    devShells.default = pkgs.mkShell {
+    devshells.default = {
       packages = with pkgs; [
         foundry-bin
         just
