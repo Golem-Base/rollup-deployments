@@ -22,7 +22,7 @@ buildGoModule rec {
 
   doCheck = false;
 
-  subPackages = [ "op-deployer/cmd/op-deployer" ];
+  subPackages = ["op-deployer/cmd/op-deployer"];
 
   meta.mainProgram = "op-deployer";
 }
