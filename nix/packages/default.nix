@@ -15,8 +15,8 @@
         {};
 
       op-deployer = op-deployer-v0_2_0-rc2;
-      op-deployer-v0_2_0-rc2 = callPackage ./op-deployer/op-deployer-v0.2.0-rc.2.nix {};
-      op-deployer-gb = callPackage ./op-deployer/op-deployer-gb.nix { };
+      op-deployer-v0_2_0-rc2 = callPackage ./op-deployer/v0.2.0-rc.2 {};
+      op-deployer-v0_2_0-rc2-gb = callPackage ./op-deployer/v0.2.0-rc.2-gb {};
 
       init-rollup-config = callPackage ./init-rollup-config.nix {inherit op-deployer;};
     };
