@@ -2,7 +2,6 @@ _: {
   perSystem = {
     pkgs,
     self',
-    inputs',
     ...
   }: {
     devshells.default = {
@@ -10,10 +9,23 @@ _: {
         foundry-bin
         just
         alejandra
+        sops
+        ssh-to-age
+        age
+        diceware
 
         self'.packages.op-deployer
         self'.formatter
-        inputs'.sops.packages.default
+      ];
+      env = [
+        {
+          name = "SOPS_CONFIG";
+          eval = "$PRJ_ROOT/sops/config.yaml";
+        }
+        {
+          name = "SOPS_SECRETS";
+          eval = "$PRJ_ROOT/sops/secrets.json";
+        }
       ];
     };
   };
