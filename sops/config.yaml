@@ -13,4 +13,3 @@ creation_rules:
     key_groups:
       - age:
           - *patrick
-  
