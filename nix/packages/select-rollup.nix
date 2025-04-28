@@ -3,7 +3,7 @@
   lib,
   ...
 }:
-pkgs.writeShellScriptBin "select-network" ''
+pkgs.writeShellScriptBin "select-rollup" ''
   #!/usr/bin/env bash
   set -euo pipefail
 

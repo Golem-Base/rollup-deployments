@@ -3,7 +3,7 @@
   lib,
   ...
 } @ args: let
-  select-network = lib.getExe args.select-network;
+  select-rollup = lib.getExe args.select-rollup;
   op-deployer = lib.getExe args.op-deployer;
   dasel = lib.getExe pkgs.dasel;
   cast = lib.getExe' pkgs.foundry-bin "cast";
@@ -11,7 +11,7 @@
   jq = lib.getExe pkgs.jq;
   openssl = lib.getExe pkgs.openssl;
 in
-  pkgs.writeShellScriptBin "deploy-network" ''
+  pkgs.writeShellScriptBin "deploy-rollup" ''
     #!/usr/bin/env bash
     set -euo pipefail
 
@@ -34,7 +34,7 @@ in
         exit 1
     fi
 
-    NETWORK=$(${select-network} --skip-l1 --show-full-path)
+    NETWORK=$(${select-rollup} --skip-l1 --show-full-path)
 
     L1_NAME="";
     L2_NAME=""

@@ -22,10 +22,10 @@
       op-deployer = gb-deployer;
       op-geth = callPackage ./op-geth/v1.101503.1 {};
 
-      init-network = callPackage ./init-network.nix {inherit op-deployer select-network;};
-      select-network = callPackage ./select-network.nix {};
-      delete-network = callPackage ./delete-network.nix {inherit select-network;};
-      deploy-network = callPackage ./deploy-network.nix {inherit op-deployer select-network;};
+      init-rollup = callPackage ./init-rollup.nix {inherit op-deployer select-rollup;};
+      select-rollup = callPackage ./select-rollup.nix {};
+      delete-rollup = callPackage ./delete-rollup.nix {inherit select-rollup;};
+      deploy-rollup = callPackage ./deploy-rollup.nix {inherit op-deployer select-rollup;};
     };
 
     apps =

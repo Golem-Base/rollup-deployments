@@ -3,9 +3,9 @@
   lib,
   ...
 } @ args: let
-  select-network = lib.getExe args.select-network;
+  select-rollup = lib.getExe args.select-rollup;
 in
-  pkgs.writeShellScriptBin "select-network" ''
+  pkgs.writeShellScriptBin "delete-rollup" ''
     #!/usr/bin/env bash
     set -euo pipefail
 
@@ -18,7 +18,7 @@ in
         exit 1
     fi
 
-    NETWORK=$(${select-network} --skip-l1 --show-full-path)
+    NETWORK=$(${select-rollup} --skip-l1 --show-full-path)
 
     L1_NAME="";
     L2_NAME=""

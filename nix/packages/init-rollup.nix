@@ -8,7 +8,7 @@
   op-deployer = lib.getExe args.op-deployer;
   dasel = lib.getExe pkgs.dasel;
   jq = lib.getExe pkgs.jq;
-  select-network = lib.getExe args.select-network;
+  select-rollup = lib.getExe args.select-rollup;
 in
   pkgs.writeShellScriptBin "init-network" ''
       set -euo pipefail
@@ -31,7 +31,7 @@ in
     EOF
       fi
 
-      NETWORK=$(${select-network} --skip-l3 --show-full-path)
+      NETWORK=$(${select-rollup} --skip-l3 --show-full-path)
       DEPLOYMENT_LAYER="";
       L1_NAME="";
       L2_NAME=""
