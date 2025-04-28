@@ -14,8 +14,10 @@ _: {
         age
         diceware
 
-        self'.packages.op-deployer
         self'.packages.gb-deployer
+        self'.packages.op-deployer
+        self'.packages.op-geth
+
         self'.formatter
       ];
       env = [

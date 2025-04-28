@@ -20,6 +20,8 @@
       # renamed to gb-deployer to allow having multiple op-deployer in packages without conflicts
       gb-deployer = callPackage ./op-deployer/v0.2.0-rc.2-gb {};
 
+      op-geth = callPackage ./op-geth/v1.101503.1 {};
+
       init-rollup-config = callPackage ./init-rollup-config.nix {inherit op-deployer;};
     };
 
