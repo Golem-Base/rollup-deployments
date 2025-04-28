@@ -16,6 +16,13 @@
       programs.shfmt.enable = true;
 
       programs.yamlfmt.enable = true;
+      programs.yamlfmt.settings = {
+        formatter = {
+          type = "basic";
+          indent = 2;
+          retain_line_breaks = true;
+        };
+      };
 
       settings.formatter.deadnix.pipeline = "nix";
       settings.formatter.deadnix.priority = 1;
