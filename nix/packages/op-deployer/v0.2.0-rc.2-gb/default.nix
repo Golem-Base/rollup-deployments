@@ -18,4 +18,6 @@ buildGoModule rec {
   postInstall = ''
     mv $out/bin/op-deployer $out/bin/gb-deployer
   '';
+
+  meta.mainProgram = "gb-deployer";
 }

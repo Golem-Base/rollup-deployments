@@ -14,12 +14,12 @@
         callPackage ./contracts-bedrock/v1.7.0-beta.1+l2-contracts
         {};
 
-      op-deployer = op-deployer-v0_2_0-rc2;
       op-deployer-v0_2_0-rc2 = callPackage ./op-deployer/v0.2.0-rc.2 {};
 
       # renamed to gb-deployer to allow having multiple op-deployer in packages without conflicts
       gb-deployer = callPackage ./op-deployer/v0.2.0-rc.2-gb {};
 
+      op-deployer = gb-deployer;
       op-geth = callPackage ./op-geth/v1.101503.1 {};
 
       init-network = callPackage ./init-network.nix {inherit op-deployer select-network;};

@@ -99,6 +99,9 @@ in
         TARGET_DIR="$DEPLOYMENTS_DIR/$L1_NAME/$L2_NAME/$DEPLOYMENT_NAME"
       fi
       mkdir -p "$TARGET_DIR"
+
+      echo "$NEW_CHAIN_ID" > $TARGET_DIR/chain-id
+
       echo "Initializing op-deployer in $TARGET_DIR..."
       ${op-deployer} init \
         --l1-chain-id "$L1_ID" \
@@ -144,7 +147,7 @@ in
       "sequencer": "$SEQUENCER_PRIV",
       "batcher": "$BATCHER_PRIV",
       "proposer": "$PROPOSER_PRIV",
-      "challeneger": "$CHALLENGER_PRIV",
+      "challenger": "$CHALLENGER_PRIV",
       "guardian": "$GUARDIAN_PRIV",
       "fee_recipient": "$FEE_RECIPIENT_PRIV"
     }
