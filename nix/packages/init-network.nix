@@ -14,16 +14,8 @@ in
   pkgs.writeShellScriptBin "init-network" ''
       set -euo pipefail
 
-      # Validate required environment variables
-      # [[ -z "$ETH_RPC_URL" ]] && echo "Error: ETH_RPC_URL environment variable not set" && exit 1
       [[ -z "$SOPS_AGE_KEY" ]] && echo "Error: SOPS_AGE_KEY environment variable not set" && exit 1
 
-      # Known L1 chain IDs
-      SEPOLIA_CHAIN_ID="11155111"
-      HOLESKY_CHAIN_ID="17000"
-      MAINNET_CHAIN_ID="1"
-
-      # Base deployments directory
       DEPLOYMENTS_DIR="$PRJ_ROOT/deployments"
       CHAIN_IDS_FILE="$DEPLOYMENTS_DIR/chain-ids.json"
 
@@ -32,12 +24,12 @@ in
         echo "Initializing $CHAIN_IDS_FILE with L1 networks..."
         mkdir -p "$DEPLOYMENTS_DIR"
         cat > "$CHAIN_IDS_FILE" <<EOF
-    {
-      "mainnet": { "id": 1 },
-      "sepolia": { "id": 11155111 },
-      "holesky": { "id": 17000 }
-    }
-    EOF
+        {
+          "mainnet": { "id": 1 },
+          "sepolia": { "id": 11155111 },
+          "holesky": { "id": 17000 }
+        }
+        EOF
       fi
 
       NETWORK=$(${select-network} --skip-l3 --show-full-path)
