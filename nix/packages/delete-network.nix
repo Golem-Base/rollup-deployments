@@ -18,7 +18,7 @@ in
         exit 1
     fi
 
-    NETWORK=$(${select-network} --show-full-path)
+    NETWORK=$(${select-network} --skip-l1 --show-full-path)
 
     L1_NAME="";
     L2_NAME=""

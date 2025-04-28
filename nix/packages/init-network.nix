@@ -1,12 +1,11 @@
 {
   pkgs,
   lib,
-  op-deployer,
   ...
 } @ args: let
   petname = lib.getExe pkgs.rust-petname;
   cast = lib.getExe' pkgs.foundry-bin "cast";
-  op-deployer' = lib.getExe op-deployer;
+  op-deployer = lib.getExe args.op-deployer;
   dasel = lib.getExe pkgs.dasel;
   jq = lib.getExe pkgs.jq;
   select-network = lib.getExe args.select-network;
@@ -24,12 +23,12 @@ in
         echo "Initializing $CHAIN_IDS_FILE with L1 networks..."
         mkdir -p "$DEPLOYMENTS_DIR"
         cat > "$CHAIN_IDS_FILE" <<EOF
-        {
-          "mainnet": { "id": 1 },
-          "sepolia": { "id": 11155111 },
-          "holesky": { "id": 17000 }
-        }
-        EOF
+    {
+      "mainnet": { "id": 1 },
+      "sepolia": { "id": 11155111 },
+      "holesky": { "id": 17000 }
+    }
+    EOF
       fi
 
       NETWORK=$(${select-network} --skip-l3 --show-full-path)
@@ -101,15 +100,12 @@ in
       fi
       mkdir -p "$TARGET_DIR"
       echo "Initializing op-deployer in $TARGET_DIR..."
-      ${op-deployer'} init \
+      ${op-deployer} init \
         --l1-chain-id "$L1_ID" \
         --l2-chain-ids "$L2_ID" \
         --workdir "$TARGET_DIR" \
         --intent-config-type custom
 
-
-     # Generate user keypairs and write files
-      # Generate JSON array of keypairs
       KEYS_JSON=$(${cast} wallet new --json -n 7)
 
       # Extract addresses and private keys for each role

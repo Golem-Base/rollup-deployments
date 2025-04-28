@@ -12,11 +12,17 @@ pkgs.writeShellScriptBin "select-network" ''
   CHAIN_IDS_FILE="''${CHAIN_IDS_FILE:-$PRJ_ROOT/deployments/chain-ids.json}"
 
   SHOW_FULL_PATH=false
+  SKIP_L1=false
   SKIP_L3=false
   for arg in "$@"; do
     case "$arg" in
       --skip-l3)
         SKIP_L3=true
+        ;;
+    esac
+    case "$arg" in
+      --skip-l1)
+        SKIP_L1=true
         ;;
     esac
     case "$arg" in
@@ -34,12 +40,13 @@ pkgs.writeShellScriptBin "select-network" ''
   l1_networks=$(${lib.getExe pkgs.jq} 'keys | join(" ")' $CHAIN_IDS_FILE | tr -d '"')
   networks_list=""
   for l1_network in $l1_networks; do
-    networks_list+="$l1_network\n"
+    if [ "$SKIP_L1" = false ]; then
+      networks_list+="$l1_network\n"
+    fi
     l1_network_data=$(${lib.getExe pkgs.jq} --arg l1 "$l1_network" '.[$l1]' $CHAIN_IDS_FILE)
     if [ -z "$l1_network_data" ] || [ "$l1_network_data" == null ]; then
       continue
     fi
-    # echo $l1_network_data
     l2_networks=$(echo $(${lib.getExe pkgs.jq} 'with_entries(select(.key != "id")) | keys | join(" ")' <<<$l1_network_data) | tr -d '"')
     for l2_network in $l2_networks; do
       networks_list+="$l1_network/$l2_network\n"
