@@ -15,6 +15,7 @@ _: {
         diceware
 
         self'.packages.op-deployer
+        self'.packages.gb-deployer
         self'.formatter
       ];
       env = [

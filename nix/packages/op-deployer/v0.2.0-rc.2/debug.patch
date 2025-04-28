@@ -1,0 +1,13 @@
+diff --git a/op-deployer/pkg/deployer/pipeline/opchain.go b/op-deployer/pkg/deployer/pipeline/opchain.go
+index dadbb34820..45bcaeed1d 100644
+--- a/op-deployer/pkg/deployer/pipeline/opchain.go
++++ b/op-deployer/pkg/deployer/pipeline/opchain.go
+@@ -32,6 +32,8 @@ func DeployOPChain(env *Env, intent *state.Intent, st *state.State, chainID comm
+ 		return fmt.Errorf("error making deploy OP chain input: %w", err)
+ 	}
+ 
++	lgr.Info("DeployOPChainInputs", "dci", dci)
++
+ 	dco, err = opcm.DeployOPChain(env.L1ScriptHost, dci)
+ 	if err != nil {
+ 		return fmt.Errorf("error deploying OP chain: %w", err)
