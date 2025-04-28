@@ -3,18 +3,19 @@
   lib,
   op-deployer,
   ...
-}: let
+} @ args: let
   petname = lib.getExe pkgs.rust-petname;
   cast = lib.getExe' pkgs.foundry-bin "cast";
   op-deployer' = lib.getExe op-deployer;
   dasel = lib.getExe pkgs.dasel;
   jq = lib.getExe pkgs.jq;
+  select-network = lib.getExe args.select-network;
 in
-  pkgs.writeShellScriptBin "init-rollup-config" ''
+  pkgs.writeShellScriptBin "init-network" ''
       set -euo pipefail
 
       # Validate required environment variables
-      [[ -z "$ETH_RPC_URL" ]] && echo "Error: ETH_RPC_URL environment variable not set" && exit 1
+      # [[ -z "$ETH_RPC_URL" ]] && echo "Error: ETH_RPC_URL environment variable not set" && exit 1
       [[ -z "$SOPS_AGE_KEY" ]] && echo "Error: SOPS_AGE_KEY environment variable not set" && exit 1
 
       # Known L1 chain IDs
@@ -39,30 +40,27 @@ in
     EOF
       fi
 
-      # Fetch current chain ID
-      CHAIN_ID=$(${cast} chain-id --rpc-url "$ETH_RPC_URL")
-      echo "Detected chain ID: $CHAIN_ID"
+      NETWORK=$(${select-network} --skip-l3 --show-full-path)
+      DEPLOYMENT_LAYER="";
+      L1_NAME="";
+      L2_NAME=""
+      CHAIN_ID=""
 
-      # Classify layer and set parent
-      if [[ "$CHAIN_ID" == "$SEPOLIA_CHAIN_ID" ]]; then
-        DEPLOYMENT_LAYER="L2"; PARENT_NAME="sepolia"; PARENT_LABEL="Sepolia (L1)"
-      elif [[ "$CHAIN_ID" == "$HOLESKY_CHAIN_ID" ]]; then
-        DEPLOYMENT_LAYER="L2"; PARENT_NAME="holesky"; PARENT_LABEL="Holesky (L1)"
-      elif [[ "$CHAIN_ID" == "$MAINNET_CHAIN_ID" ]]; then
-        DEPLOYMENT_LAYER="L2"; PARENT_NAME="mainnet"; PARENT_LABEL="Ethereum Mainnet (L1)"
+      if [[ "$NETWORK" == */* ]]; then
+        L1_NAME="''${NETWORK%%/*}"
+        L2_NAME="''${NETWORK#*/}"
+        DEPLOYMENT_LAYER="L3"
+        CHAIN_ID=$(jq -r --arg l1 $L1_NAME --arg l2 $L2_NAME '.[$l1][$l2].id' $CHAIN_IDS_FILE)
+        echo "Initialising a new $DEPLOYMENT_LAYER rollup on $L2_NAME"
       else
-        DEPLOYMENT_LAYER="L3"; PARENT_NAME=""; L2_NAME=""
-        for l1 in sepolia holesky mainnet; do
-          found=$(${jq} -r --arg id "$CHAIN_ID" --arg l1 "$l1" '
-            .[$l1] | to_entries | map(select(.value.id == ($id|tonumber) and .key != "id")) | .[0].key // empty
-          ' "$CHAIN_IDS_FILE")
-          if [ -n "$found" ]; then
-            PARENT_NAME="$l1"; L2_NAME="$found"; PARENT_LABEL="$found (L2) on $l1"; break
-          fi
-        done
-        if [ -z "$PARENT_NAME" ]; then
-          echo "❌ Chain ID $CHAIN_ID not recognized."; exit 1
-        fi
+        L1_NAME="$NETWORK"
+        DEPLOYMENT_LAYER="L2"
+        CHAIN_ID=$(jq -r --arg l1 $L1_NAME '.[$l1].id' $CHAIN_IDS_FILE)
+        echo "Initialising a new $DEPLOYMENT_LAYER rollup on $L1_NAME"
+      fi
+
+      if [ -z "$CHAIN_ID" ] || [ "$CHAIN_ID" == null ]; then
+        echo "❌ Chain ID $CHAIN_ID not recognized."; exit 1
       fi
 
       # Deployment name
@@ -75,17 +73,17 @@ in
       fi
 
       # Compute new chainID & timestamp
-      NEW_CHAIN_ID=$((16#$(${cast} keccak "$DEPLOYMENT_NAME" | cut -c3-9)))
+      NEW_CHAIN_ID=$((16#$(${cast} keccak "$DEPLOYMENT_NAME" | cut -c$([ "$DEPLOYMENT_LAYER" == "L2" ] && echo "3-7" || echo "3-9"))))
       TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
       # Prepare chain-ids.json update in TMP
       TMP_CHAIN=$(mktemp)
       cp "$CHAIN_IDS_FILE" "$TMP_CHAIN"
       if [[ "$DEPLOYMENT_LAYER" == "L2" ]]; then
-        ${jq} --arg p "$PARENT_NAME" --arg n "$DEPLOYMENT_NAME" --arg id "$NEW_CHAIN_ID" --arg ts "$TIMESTAMP" \
+        ${jq} --arg p "$L1_NAME" --arg n "$DEPLOYMENT_NAME" --arg id "$NEW_CHAIN_ID" --arg ts "$TIMESTAMP" \
           '.[$p][$n] = {id:($id|tonumber),created_at:$ts}' "$CHAIN_IDS_FILE" > "$TMP_CHAIN"
       else
-        ${jq} --arg p "$PARENT_NAME" --arg l2 "$L2_NAME" --arg n "$DEPLOYMENT_NAME" --arg id "$NEW_CHAIN_ID" --arg ts "$TIMESTAMP" \
+        ${jq} --arg p "$L1_NAME" --arg l2 "$L2_NAME" --arg n "$DEPLOYMENT_NAME" --arg id "$NEW_CHAIN_ID" --arg ts "$TIMESTAMP" \
           '.[$p][$l2][$n] = {id:($id|tonumber),created_at:$ts}' "$CHAIN_IDS_FILE" > "$TMP_CHAIN"
       fi
       echo; echo "Proposed changes to $CHAIN_IDS_FILE:"; diff --color -u "$CHAIN_IDS_FILE" "$TMP_CHAIN" || true
@@ -99,15 +97,15 @@ in
       if [[ "$DEPLOYMENT_LAYER" == "L2" ]]; then
         L1_ID="$CHAIN_ID"; L2_ID="$NEW_CHAIN_ID"
       else
-        L1_ID=$(${jq} -r --arg p "$PARENT_NAME" --arg l2 "$L2_NAME" '.[$p][$l2].id' "$CHAIN_IDS_FILE")
+        L1_ID=$(${jq} -r --arg p "$L1_NAME" --arg l2 "$L2_NAME" '.[$p][$l2].id' "$CHAIN_IDS_FILE")
         L2_ID="$NEW_CHAIN_ID"
       fi
 
       # Final target directory and init
       if [[ "$DEPLOYMENT_LAYER" == "L2" ]]; then
-        TARGET_DIR="$DEPLOYMENTS_DIR/$PARENT_NAME/$DEPLOYMENT_NAME"
+        TARGET_DIR="$DEPLOYMENTS_DIR/$L1_NAME/$DEPLOYMENT_NAME"
       else
-        TARGET_DIR="$DEPLOYMENTS_DIR/$PARENT_NAME/$L2_NAME/$DEPLOYMENT_NAME"
+        TARGET_DIR="$DEPLOYMENTS_DIR/$L1_NAME/$L2_NAME/$DEPLOYMENT_NAME"
       fi
       mkdir -p "$TARGET_DIR"
       echo "Initializing op-deployer in $TARGET_DIR..."

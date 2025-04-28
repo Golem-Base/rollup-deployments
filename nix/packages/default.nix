@@ -22,7 +22,9 @@
 
       op-geth = callPackage ./op-geth/v1.101503.1 {};
 
-      init-rollup-config = callPackage ./init-rollup-config.nix {inherit op-deployer;};
+      init-rollup-config = callPackage ./init-rollup-config.nix {inherit op-deployer select-network;};
+      select-network = callPackage ./select-network.nix {};
+      delete-network = callPackage ./delete-network.nix {inherit select-network;};
     };
 
     apps =
