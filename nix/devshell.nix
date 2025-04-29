@@ -6,13 +6,14 @@ _: {
   }: {
     devshells.default = {
       packages = with pkgs; [
+        age
+        alejandra
+        diceware
         foundry-bin
         just
-        alejandra
+        minio-client
         sops
         ssh-to-age
-        age
-        diceware
 
         self'.packages.gb-deployer
         self'.packages.op-deployer
