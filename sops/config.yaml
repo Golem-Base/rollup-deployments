@@ -1,5 +1,6 @@
 keys:
   - &patrick age19cfz59sj736emqhz694hlmmptwt47nv0yzxperkjnz5ly3qyrcrqmrhrt7
+  - &aldo age1ewjdwnhvhrkwjnxynvcpkxft3eydnqx8d49zsgt04n2j2qrd2ysqz48e29
 
 creation_rules:
   # encrypt all user-private-keys.json under deployments
@@ -7,9 +8,11 @@ creation_rules:
     key_groups:
       - age:
           - *patrick
+          - *aldo
 
   # apply to any top-level secrets.json (e.g. project-wide secrets)
   - path_regex: 'secrets\.json$'
     key_groups:
       - age:
           - *patrick
+          - *aldo

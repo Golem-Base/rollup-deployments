@@ -26,6 +26,7 @@
       select-rollup = callPackage ./select-rollup.nix {};
       delete-rollup = callPackage ./delete-rollup.nix {inherit select-rollup;};
       deploy-rollup = callPackage ./deploy-rollup.nix {inherit op-deployer select-rollup;};
+      upload-rollup = callPackage ./upload-rollup.nix {inherit select-rollup;};
     };
 
     apps =

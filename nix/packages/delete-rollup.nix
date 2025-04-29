@@ -42,7 +42,6 @@ in
     fi
 
     NETWORK_PATH=""
-
     if [[ -z "$L3_NAME" ]]; then
       NETWORK_PATH="$PRJ_ROOT/deployments/$L1_NAME/$L2_NAME"
     else

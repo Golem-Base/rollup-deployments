@@ -15,6 +15,9 @@ _: {
         sops
         ssh-to-age
 
+        minio-client
+        doppler
+
         self'.packages.gb-deployer
         self'.packages.op-deployer
         self'.packages.op-geth
