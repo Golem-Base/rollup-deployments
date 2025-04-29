@@ -17,7 +17,7 @@
       "eip1559Params": "0x0000000000000000"
     }
   },
-  "block_time": 2,
+  "block_time": 1,
   "max_sequencer_drift": 600,
   "seq_window_size": 3600,
   "channel_timeout": 300,
@@ -40,4 +40,3 @@
     "eip1559DenominatorCanyon": 250
   }
 }
-
