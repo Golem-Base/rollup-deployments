@@ -65,34 +65,45 @@ in
     DOPPLER_TOKEN=$(${sops} decrypt $SECRETS_FILE | ${jq} '.doppler_token' | tr -d '"')
     DOPPLER_KEY_NAME=$(echo "''${DEPLOYMENT_NAME}__private_keys" | tr '[:lower:]' '[:upper:]')
 
-    ${doppler} secrets set $DOPPLER_KEY_NAME "$USER_PRIVATE_KEYS" --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN
+    if ${doppler} secrets get $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN > /dev/null 2>&1; then
+      echo "Found secret for $DOPPLER_KEY_NAME"
+    else
+      ${doppler} secrets set $DOPPLER_KEY_NAME "$USER_PRIVATE_KEYS" --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN
+    fi
 
-    ENDPOINT=$(sops -d "$SOPS_CONFIG" | jq -r '.minio.endpoint')
-    ACCESS_KEY=$(sops -d "$SOPS_CONFIG" | jq -r '.minio.access_key')
-    SECRET_KEY=$(sops -d "$SOPS_CONFIG" | jq -r '.minio.secret_key')
-    BUCKET_NAME=$(sops -d "$SOPS_CONFIG" | jq -r '.minio.bucket')
+    ENDPOINT=fsn1.your-objectstorage.com
+    ACCESS_KEY=$(sops -d "$SECRETS_FILE" | jq -r '.hetzner_storage.access_key')
+    SECRET_KEY=$(sops -d "$SECRETS_FILE" | jq -r '.hetzner_storage.secret_key')
+    BUCKET_NAME="rollup-deployments"
 
     # Validate extracted information
-    if [ -z "$ENDPOINT" ] || [ -z "$ACCESS_KEY" ] || [ -z "$SECRET_KEY" ] || [ -z "$BUCKET_NAME" ]; then
+    if [ -z "$ACCESS_KEY" ] || [ -z "$SECRET_KEY" ]; then
         echo "Error: Failed to extract all required information from SOPS config file"
-        echo "Make sure your SOPS file contains endpoint, access_key, secret_key, and bucket fields"
+        echo "Make sure your SOPS file contains access_key, secret_key"
         exit 1
     fi
 
-    echo "Uploading directory '$LOCAL_DIR' to bucket '$BUCKET_NAME/$REMOTE_PATH'..."
-
-    # Use the AWS S3 compatible approach with environment variables
-    # This avoids the need to set aliases in the config file
     export MC_HOST_s3="https://$ACCESS_KEY:$SECRET_KEY@$ENDPOINT"
+    if ${mc} stat s3/$BUCKET_NAME/$DEPLOYMENT_NAME > /dev/null 2>&1; then
+      echo "$DEPLOYMENT_NAME already uploaded"
+    else
+      echo "Uploading $DEPLOYMENT_NAME..."
+      for file in "$TMP_DIR"/*; do
+          if [ -f "$file" ] && [[ ! $(basename "$file") == .* ]]; then
+              filename=$(basename "$file")
+              echo "Uploading $filename..."
+              ${mc} cp "$file" "s3/$BUCKET_NAME/$DEPLOYMENT_NAME/$filename"
 
-    # Upload the directory recursively
-    mc cp --recursive "$TMP_DIR" "s3/$BUCKET_NAME/$DEPLOYMENT_NAME"
+              # Check individual file upload status
+              if [ $? -ne 0 ]; then
+                  echo "Warning: Failed to upload $filename, deleting $DEPLOYMENT_NAME"
+                  ${mc} rm "s3/$BUCKECT_NAME/$DEPLOYMENT_NAME"
+              fi
+          fi
+      done
 
-    # # Unset environment variables to clean up
-    # unset MC_HOST_s3
+    fi
 
-    ${mc} put $GENESIS_FILE gb/golem-base/$DEPLOYMENT_NAME/genesis.json
-    # # mc put ./{{ network }}/rollup.json gb/golem-base/{{ network }}-l2/rollup.json
-    # # mc put ./{{ network }}/state.json gb/golem-base/{{ network }}-l2/state.json
-
+    rm -rf "$TMP_DIR"
+    unset MC_HOST_s3
   ''
