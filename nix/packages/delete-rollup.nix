@@ -94,7 +94,7 @@ in
 
     export MC_HOST_s3="https://$ACCESS_KEY:$SECRET_KEY@$ENDPOINT"
     if ${mc} stat s3/$BUCKET_NAME/$DEPLOYMENT_NAME > /dev/null 2>&1; then
-      ${mc} rm "s3/$BUCKET_NAME/$DEPLOYMENT_NAME"
+      ${mc} rm --recursive --force "s3/$BUCKET_NAME/$DEPLOYMENT_NAME"
     fi
 
     echo "Done"

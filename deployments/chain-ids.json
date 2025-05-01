@@ -3,7 +3,11 @@
     "id": 1
   },
   "sepolia": {
-    "id": 11155111
+    "id": 11155111,
+    "deep_dalmatian": {
+      "id": 963920,
+      "created_at": "2025-05-01T17:25:45Z"
+    }
   },
   "holesky": {
     "id": 17000
