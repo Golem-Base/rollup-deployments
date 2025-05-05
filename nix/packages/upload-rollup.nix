@@ -65,10 +65,13 @@ in
 
     DOPPLER_TOKEN=$(${sops} decrypt $SECRETS_FILE | ${jq} '.doppler_token' | tr -d '"')
     DOPPLER_KEY_NAME=$(echo "''${DEPLOYMENT_NAME}" | tr '[:lower:]' '[:upper:]')
-    if ${doppler} secrets get $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN > /dev/null 2>&1; then
-      echo "Found secret for $DOPPLER_KEY_NAME"
-    else
+
+    ${doppler} secrets get $DOPPLER_KEY_NAME --project "golem-base" --config "prd" --token $DOPPLER_TOKEN > /dev/null 2>/dev/null;
+    DOPPLER_SUCCESS=$?
+    if [ ! "$DOPPLER_SUCCESS" -eq 0 ]; then
       ${doppler} secrets set $DOPPLER_KEY_NAME "$USER_PRIVATE_KEYS" --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN
+    else
+      echo "Doppler secret $DOPPLER_KEY_NAME already set"
     fi
 
     ENDPOINT=fsn1.your-objectstorage.com
@@ -112,8 +115,15 @@ in
     IMAGE_TAG="$DEPLOYMENT_NAME"
     FULL_IMAGE_NAME="$IMAGE_NAME:$IMAGE_TAG"
     REPOSITORY_NAME="rollup-deployments"
-    echo "tag: $FULL_IMAGE_NAME"
-    ${docker} buildx build --file $PRJ_ROOT/docker/Dockerfile --tag $FULL_IMAGE_NAME $TMP_DIR
+
+    DOCKER_DIR=$(mktemp -d)
+    mkdir -p $DOCKER_DIR/scripts $DOCKER_DIR/artifacts
+
+    cp $PRJ_ROOT/docker/Dockerfile $DOCKER_DIR/
+    cp -r $TMP_DIR/* $DOCKER_DIR/artifacts/
+    cp -r $PRJ_ROOT/docker/scripts/* $DOCKER_DIR/scripts/
+
+    ${docker} buildx build --tag $FULL_IMAGE_NAME $DOCKER_DIR
     if [ $? -ne 0 ]; then
       echo "Error: Failed to build Docker image"
       exit 1
@@ -139,4 +149,5 @@ in
     docker logout quay.io
 
     rm -rf "$TMP_DIR"
+    rm -rf "$DOCKER_DIR"
   ''
