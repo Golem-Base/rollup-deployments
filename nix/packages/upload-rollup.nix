@@ -112,7 +112,7 @@ in
 
     TIMESTAMP=$(date '+%Y%m%d%H%M%S')
     IMAGE_NAME=''${IMAGE_NAME:-"golem-base-init"}
-    IMAGE_TAG="$DEPLOYMENT_NAME"
+    IMAGE_TAG="$DEPLOYMENT_NAME--$TIMESTAMP"
     FULL_IMAGE_NAME="$IMAGE_NAME:$IMAGE_TAG"
     REPOSITORY_NAME="rollup-deployments"
 

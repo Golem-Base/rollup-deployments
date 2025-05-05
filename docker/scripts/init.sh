@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 set -euo pipefail
 
-for dir in "/init" "/execution" "/deployment" "/peers"; do
+for dir in "/init" "/execution" "/artifacts" "/peers"; do
   if [ ! -d "$dir" ]; then
     echo "ERROR: Required directory $dir does not exist"
     exit 1
@@ -19,11 +19,11 @@ if ! jq empty /peers/peers.json > /dev/null 2>&1; then
 fi
 
 if [ ! -d /execution/geth ]; then
-  geth init --state.scheme=hash --datadir=/execution /deployment/genesis.json
+  geth init --state.scheme=hash --datadir=/execution /artifacts/genesis.json
 fi
 
-cp /deployment/rollup.json /init
-cp /deployment/chain-id /init
+cp /artifacts/rollup.json /init
+cp /artifacts/chain-id /init
 
 POD_BASE_NAME=$(echo "${POD_NAME}" | sed -E 's/-[0-9]+$//')
 getent hosts "$POD_BASE_NAME.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local" | awk '{ print $1 }' > /init/service_ip
