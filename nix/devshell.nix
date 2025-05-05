@@ -18,6 +18,8 @@ _: {
         minio-client
         doppler
 
+        docker
+
         self'.packages.gb-deployer
         self'.packages.op-deployer
         self'.packages.op-geth

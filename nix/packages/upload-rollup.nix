@@ -8,6 +8,7 @@
   doppler = lib.getExe pkgs.doppler;
   sops = lib.getExe pkgs.sops;
   jq = lib.getExe pkgs.jq;
+  docker = lib.getExe pkgs.docker;
 in
   pkgs.writeShellScriptBin "upload-rollup" ''
     NETWORK=$(${select-rollup} --skip-l1 --show-full-path)
@@ -62,14 +63,13 @@ in
 
     USER_PRIVATE_KEYS=$(${sops} -d $USER_PRIVATE_KEYS_FILE | ${jq})
 
-    # NOTE Doppler can be done manually for the time being
-    # DOPPLER_TOKEN=$(${sops} decrypt $SECRETS_FILE | ${jq} '.doppler_token' | tr -d '"')
-    # DOPPLER_KEY_NAME=$(echo "''${DEPLOYMENT_NAME}__private_keys" | tr '[:lower:]' '[:upper:]')
-    # if ${doppler} secrets get $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN > /dev/null 2>&1; then
-    #   echo "Found secret for $DOPPLER_KEY_NAME"
-    # else
-    #   ${doppler} secrets set $DOPPLER_KEY_NAME "$USER_PRIVATE_KEYS" --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN
-    # fi
+    DOPPLER_TOKEN=$(${sops} decrypt $SECRETS_FILE | ${jq} '.doppler_token' | tr -d '"')
+    DOPPLER_KEY_NAME=$(echo "''${DEPLOYMENT_NAME}" | tr '[:lower:]' '[:upper:]')
+    if ${doppler} secrets get $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN > /dev/null 2>&1; then
+      echo "Found secret for $DOPPLER_KEY_NAME"
+    else
+      ${doppler} secrets set $DOPPLER_KEY_NAME "$USER_PRIVATE_KEYS" --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN
+    fi
 
     ENDPOINT=fsn1.your-objectstorage.com
     ACCESS_KEY=$(sops -d "$SECRETS_FILE" | jq -r '.hetzner_storage.access_key')
@@ -101,9 +101,42 @@ in
               fi
           fi
       done
+    fi
+    unset MC_HOST_s3
 
+    QUAY_USERNAME=$(${sops} -d $SECRETS_FILE | ${jq} -r ".quay.username")
+    QUAY_TOKEN=$(${sops} -d $SECRETS_FILE | ${jq} -r ".quay.token")
+
+    TIMESTAMP=$(date '+%Y%m%d%H%M%S')
+    IMAGE_NAME=''${IMAGE_NAME:-"golem-base-init"}
+    IMAGE_TAG="$DEPLOYMENT_NAME"
+    FULL_IMAGE_NAME="$IMAGE_NAME:$IMAGE_TAG"
+    REPOSITORY_NAME="rollup-deployments"
+    echo "tag: $FULL_IMAGE_NAME"
+    ${docker} buildx build --file $PRJ_ROOT/docker/Dockerfile --tag $FULL_IMAGE_NAME $TMP_DIR
+    if [ $? -ne 0 ]; then
+      echo "Error: Failed to build Docker image"
+      exit 1
     fi
 
+    echo "Logging in to Quay.io..."
+    echo "$QUAY_TOKEN" | docker login quay.io -u "$QUAY_USERNAME" --password-stdin
+    QUAY_IMAGE="quay.io/golemnetwork/$REPOSITORY_NAME:$IMAGE_NAME--$IMAGE_TAG"
+
+    echo "Tagging image for Quay.io..."
+    docker tag "$FULL_IMAGE_NAME" "$QUAY_IMAGE"
+
+    echo "Pushing image to Quay.io..."
+    docker push "$QUAY_IMAGE"
+    if [ $? -ne 0 ]; then
+      echo "Error: Failed to push image to Quay.io"
+      exit 1
+    fi
+
+    echo "Success! Image uploaded to Quay.io"
+    echo "Image URL: https://$QUAY_IMAGE"
+
+    docker logout quay.io
+
     rm -rf "$TMP_DIR"
-    unset MC_HOST_s3
   ''
