@@ -88,9 +88,10 @@ in
     mv "$TMP_CHAIN" "$CHAIN_IDS_FILE"
     rm -rf $NETWORK_PATH
 
-    if ${doppler} secrets get $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN > /dev/null 2>&1; then
-      ${doppler} secrets delete $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN
-    fi
+    # NOTE Doppler can be deleted manually
+    # if ${doppler} secrets get $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN > /dev/null 2>&1; then
+    #   ${doppler} secrets delete $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN
+    # fi
 
     export MC_HOST_s3="https://$ACCESS_KEY:$SECRET_KEY@$ENDPOINT"
     if ${mc} stat s3/$BUCKET_NAME/$DEPLOYMENT_NAME > /dev/null 2>&1; then

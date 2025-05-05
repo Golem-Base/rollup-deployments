@@ -62,14 +62,14 @@ in
 
     USER_PRIVATE_KEYS=$(${sops} -d $USER_PRIVATE_KEYS_FILE | ${jq})
 
-    DOPPLER_TOKEN=$(${sops} decrypt $SECRETS_FILE | ${jq} '.doppler_token' | tr -d '"')
-    DOPPLER_KEY_NAME=$(echo "''${DEPLOYMENT_NAME}__private_keys" | tr '[:lower:]' '[:upper:]')
-
-    if ${doppler} secrets get $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN > /dev/null 2>&1; then
-      echo "Found secret for $DOPPLER_KEY_NAME"
-    else
-      ${doppler} secrets set $DOPPLER_KEY_NAME "$USER_PRIVATE_KEYS" --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN
-    fi
+    # NOTE Doppler can be done manually for the time being
+    # DOPPLER_TOKEN=$(${sops} decrypt $SECRETS_FILE | ${jq} '.doppler_token' | tr -d '"')
+    # DOPPLER_KEY_NAME=$(echo "''${DEPLOYMENT_NAME}__private_keys" | tr '[:lower:]' '[:upper:]')
+    # if ${doppler} secrets get $DOPPLER_KEY_NAME --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN > /dev/null 2>&1; then
+    #   echo "Found secret for $DOPPLER_KEY_NAME"
+    # else
+    #   ${doppler} secrets set $DOPPLER_KEY_NAME "$USER_PRIVATE_KEYS" --type "json" --project "golem-base" --config "prd" --token $DOPPLER_TOKEN
+    # fi
 
     ENDPOINT=fsn1.your-objectstorage.com
     ACCESS_KEY=$(sops -d "$SECRETS_FILE" | jq -r '.hetzner_storage.access_key')
