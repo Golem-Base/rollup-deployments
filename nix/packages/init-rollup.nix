@@ -31,6 +31,36 @@ in
     EOF
       fi
 
+      DEPLOYMENT_NAME="";
+
+      # Parse command line arguments
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --deployment-name)
+            DEPLOYMENT_NAME="$2"
+            shift 2
+            ;;
+          --deployment-name=*)
+            DEPLOYMENT_NAME="''${1#*=}"
+            shift
+            ;;
+          *)
+            shift
+            ;;
+        esac
+      done
+
+      if [[ -z "$DEPLOYMENT_NAME" ]]; then
+        read -p "Enter deployment name: " USER_INPUT
+
+        if [[ -z "$USER_INPUT" ]]; then
+          echo "Error: Deployment name cannot be empty"
+          exit 1
+        else
+          DEPLOYMENT_NAME="$USER_INPUT"
+        fi
+      fi
+
       NETWORK=$(${select-rollup} --skip-l3 --show-full-path)
       DEPLOYMENT_LAYER="";
       L1_NAME="";
@@ -42,25 +72,16 @@ in
         L2_NAME="''${NETWORK#*/}"
         DEPLOYMENT_LAYER="L3"
         CHAIN_ID=$(jq -r --arg l1 $L1_NAME --arg l2 $L2_NAME '.[$l1][$l2].id' $CHAIN_IDS_FILE)
-        echo "Initialising a new $DEPLOYMENT_LAYER rollup on $L2_NAME"
+        echo "Initialising $DEPLOYMENT_NAME rollup on $L2_NAME"
       else
         L1_NAME="$NETWORK"
         DEPLOYMENT_LAYER="L2"
         CHAIN_ID=$(jq -r --arg l1 $L1_NAME '.[$l1].id' $CHAIN_IDS_FILE)
-        echo "Initialising a new $DEPLOYMENT_LAYER rollup on $L1_NAME"
+        echo "Initialising $DEPLOYMENT_NAME rollup on $L1_NAME"
       fi
 
       if [ -z "$CHAIN_ID" ] || [ "$CHAIN_ID" == null ]; then
         echo "❌ Chain ID $CHAIN_ID not recognized."; exit 1
-      fi
-
-      # Deployment name
-      if [ $# -eq 0 ]; then
-        wc=$([[ "$DEPLOYMENT_LAYER" == "L2" ]] && echo 2 || echo 3)
-        DEPLOYMENT_NAME=$(${petname} -w $wc -s _ -a -c large)
-        echo "Generated name: $DEPLOYMENT_NAME"
-      else
-        DEPLOYMENT_NAME="$1"; echo "Using name: $DEPLOYMENT_NAME"
       fi
 
       # Compute new chainID & timestamp
