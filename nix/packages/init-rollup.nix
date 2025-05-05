@@ -3,7 +3,6 @@
   lib,
   ...
 } @ args: let
-  petname = lib.getExe pkgs.rust-petname;
   cast = lib.getExe' pkgs.foundry-bin "cast";
   op-deployer = lib.getExe args.op-deployer;
   dasel = lib.getExe pkgs.dasel;
