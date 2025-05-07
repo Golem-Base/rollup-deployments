@@ -33,7 +33,6 @@ if [ -n "${POD_NAME:-}" ]; then
       echo "Found service for pod at ip: $(cat /init/service_ip)"
     else
       echo "Failed to find IP from POD_BASE_NAME: $POD_BASE_NAME"
-      exit 1
     fi
 
     PEERS_JSON_PATH="/peers/peers.json"
@@ -64,7 +63,6 @@ $EXECUTION_PEERS
 EOF
     else
       echo "$PEERS_JSON_PATH does not exist, skipping op-node and op-geth static peer construction" 
-      exit 1
     fi
   else
     echo "Failed to extract POD_BASE_NAME from POD_NAME: $POD_NAME"
