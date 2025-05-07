@@ -53,3 +53,5 @@ TrustedNodes = [
 $EXECUTION_PEERS
 ]
 EOF
+
+openssl rand -hex 32 > /init/jwt
