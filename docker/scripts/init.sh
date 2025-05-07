@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 set -exuo pipefail
 
 for dir in "/init" "/execution" "/artifacts"; do
