@@ -26,13 +26,18 @@ if [ -n "${POD_NAME:-}" ]; then
   POD_BASE_NAME=$(echo "${POD_NAME}" | sed -E 's/-[0-9]+$//')
 
   if [ -n "${POD_BASE_NAME:-}" ]; then
-    IP=$(getent hosts "$POD_BASE_NAME.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local" | awk '{ print $1 }')
-
-    if [ -n "${IP:-}" ]; then
-      echo "$IP" > /init/service_ip
-      echo "Found service for pod at ip: $(cat /init/service_ip)"
+    svc_namespace_file=/var/run/secrets/kubernetes.io/serviceaccount/namespace
+    if [ -f "$svc_namespace_file" ]; then
+      namespace=$(cat $svc_namespace_file)
+      IP=$(getent hosts "$POD_BASE_NAME.$namespace.svc.cluster.local" | awk '{ print $1 }')
+      if [ -n "${IP:-}" ]; then
+        echo "$IP" > /init/service_ip
+        echo "Found service for pod at ip: $(cat /init/service_ip)"
+      else
+        echo "Failed to find IP from POD_BASE_NAME: $POD_BASE_NAME"
+      fi
     else
-      echo "Failed to find IP from POD_BASE_NAME: $POD_BASE_NAME"
+      echo "Namespace file $svc_namespace_file doesn't exist"
     fi
 
     PEERS_JSON_PATH="/peers/peers.json"
