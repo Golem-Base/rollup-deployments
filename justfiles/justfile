@@ -10,6 +10,8 @@ L1_CHAIN_ID := if network == "holesky" {
   "393530"
 } else if network == "sepolia-l3" {
   "393531"
+} else if network == "laika" {
+  "393530"
 } else {
   error("Invalid network")
 }
@@ -20,6 +22,8 @@ L2_CHAIN_ID := if network == "holesky" {
   "393531"
 } else if network == "holesky-l3" {
   "934720"
+} else if network == "laika" {
+  "934730"
 } else if network == "sepolia-l3" {
   "6296375"
 } else {
@@ -32,7 +36,7 @@ L1_CONTRACTS_RELEASE := "op-contracts/v2.0.0-rc.1"
 # NOTE: The artifacts checksum is computed using the following script:
 # The artifact is calculated on the gb/op-contracts/v2.0.0-rc.1 branch.
 # URL: https://github.com/ethereum-optimism/optimism/blob/develop/packages/contracts-bedrock/scripts/ops/calculate-checksum.sh
-# Using a tag brings in all kinds of side effects (cf. https://github.com/ethereum-optimism/optimism/tree/e1516f01b379868f50fd3610a89daf0a560277f4/op-deployer/pkg/deployer/pipeline/init.go#L41), so we stick to an artifact.
+# Using a tag brings in all kinds of side effects (cf. https://github.com/ethereum-optimism/optimism/tree/e1516f01b379868f50fd3610a89daf0a560277f4/gb-deployer/pkg/deployer/pipeline/init.go#L41), so we stick to an artifact.
 L1_CHECKSUM := "1e788c684d48232a85cf5f5bd3876e83d6d2240c80588f60e160faca0133eac8"
 
 L1_ARTIFACTS_LOCATOR := "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-" + L1_CHECKSUM + ".tar.gz"
@@ -57,6 +61,8 @@ L1_RPC_URL := if network == "sepolia" {
   env("L2_RPC_URL")
 } else if network == "sepolia-l3" {
   env("L2_RPC_URL")
+} else if network == "laika" {
+  env("L2_RPC_URL")
 } else {
 error("Invalid network")
 }
@@ -68,6 +74,8 @@ L2_RPC_URL := if network == "sepolia" {
 } else if network == "holesky-l3" {
   env("L3_RPC_URL")
 } else if network == "sepolia-l3" {
+  env("L3_RPC_URL")
+} else if network == "laika" {
   env("L3_RPC_URL")
 } else { error("Invalid network") }
 
@@ -150,7 +158,7 @@ _create_workdir:
 
 # Initialize deployment configuration
 init: _create_workdir
-    op-deployer init \
+    gb-deployer init \
         --l1-chain-id {{ L1_CHAIN_ID }} \
         --l2-chain-ids {{ L2_CHAIN_ID }} \
         --workdir ./{{ network }} \
@@ -168,7 +176,7 @@ init: _create_workdir
 # Bootstrap superchain configuration
 [no-exit-message]
 bootstrap-superchain:
-    op-deployer bootstrap superchain \
+    gb-deployer bootstrap superchain \
         --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
         --l1-rpc-url {{ L1_RPC_URL }} \
         --artifacts-locator {{ L1_ARTIFACTS_LOCATOR }} \
@@ -202,7 +210,7 @@ bootstrap-superchain:
 [no-exit-message]
 @bootstrap-implementations:
     # NOTE: these addresses end up in the OPCM
-    op-deployer bootstrap implementations \
+    gb-deployer bootstrap implementations \
         --superchain-config-proxy "$(jq -r .SuperchainConfigProxy ./{{ network }}/superchain.json)" \
         --protocol-versions-proxy "$(jq -r .ProtocolVersionsProxy ./{{ network }}/superchain.json)" \
         --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
@@ -216,7 +224,7 @@ bootstrap-superchain:
 # Bootstrap proxy configuration
 [no-exit-message]
 bootstrap-proxy:
-    op-deployer bootstrap proxy \
+    gb-deployer bootstrap proxy \
         --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
         --l1-rpc-url {{ L1_RPC_URL }} \
         --artifacts-locator {{ L1_ARTIFACTS_LOCATOR }} \
@@ -226,7 +234,7 @@ bootstrap-proxy:
 # Apply all configurations
 [no-exit-message]
 apply:
-    op-deployer apply \
+    gb-deployer apply \
         --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
         --l1-rpc-url {{ L1_RPC_URL }} \
         --workdir ./{{ network }}
@@ -239,11 +247,11 @@ deploy: init bootstrap-superchain bootstrap-implementations bootstrap-proxy appl
 # NOTE: Changes to these two files should usually be deployed in sync, because rollup.json depends on values in genesis.json.
 # If you run this with an existing L2 chain running in a node, you probably want to delete op-geth's state directory, so that op-geth-init is run again. Otherwise op-node might refuse to start.
 create-genesis:
-   op-deployer inspect genesis \
+   gb-deployer inspect genesis \
         --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} \
         > ./{{ network }}/genesis.json
 
-   op-deployer inspect rollup \
+   gb-deployer inspect rollup \
         --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} \
         > ./{{ network }}/rollup.json
 
@@ -257,9 +265,9 @@ validate:
   op-validator validate v2.0.0 \
     --l1-rpc-url {{ L1_RPC_URL }} \
     --l2-chain-id {{ L2_CHAIN_ID }} \
-    --proxy-admin $(op-deployer inspect l1  --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.proxyAdminAddress) \
+    --proxy-admin $(gb-deployer inspect l1  --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.proxyAdminAddress) \
     --absolute-prestate 0x03b357b30095022ecbb44ef00d1de19df39cf69ee92a60683a6be2c6f8fe6a3e \
-    --system-config $(op-deployer inspect l1  --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.systemConfigProxyAddress)
+    --system-config $(gb-deployer inspect l1  --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.systemConfigProxyAddress)
 
 # move some ETH from L admin to L proposer and batcher
 fund value:
@@ -297,7 +305,7 @@ bridge value:
       --rpc-url {{ L1_RPC_URL }} \
       --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
       --value {{ value }} \
-      $(op-deployer inspect l1  --workdir ./{{ network }} {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.l1StandardBridgeProxyAddress) \
+      $(gb-deployer inspect l1  --workdir ./{{ network }} {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.l1StandardBridgeProxyAddress) \
       "bridgeETHTo(address _to, uint32 _minGasLimit, bytes calldata _extraData)" \
         $address \
         1000000 \
