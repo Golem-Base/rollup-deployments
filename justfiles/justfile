@@ -12,6 +12,8 @@ L1_CHAIN_ID := if network == "holesky" {
   "393531"
 } else if network == "laika" {
   "393530"
+} else if network == "aurora" {
+  "17000"
 } else {
   error("Invalid network")
 }
@@ -26,6 +28,8 @@ L2_CHAIN_ID := if network == "holesky" {
   "934730"
 } else if network == "sepolia-l3" {
   "6296375"
+} else if network == "aurora" {
+  "400000"
 } else {
   error("Invalid network")
 }
@@ -63,8 +67,10 @@ L1_RPC_URL := if network == "sepolia" {
   env("L2_RPC_URL")
 } else if network == "laika" {
   env("L2_RPC_URL")
+} else if network == "aurora" {
+  env("L1_RPC_URL")
 } else {
-error("Invalid network")
+  error("Invalid network")
 }
 
 L2_RPC_URL := if network == "sepolia" {
@@ -77,6 +83,8 @@ L2_RPC_URL := if network == "sepolia" {
   env("L3_RPC_URL")
 } else if network == "laika" {
   env("L3_RPC_URL")
+} else if network == "aurora" {
+  env("L2_RPC_URL")
 } else { error("Invalid network") }
 
 # Default recipe shows available commands
@@ -256,9 +264,9 @@ create-genesis:
         > ./{{ network }}/rollup.json
 
 push-jsons: create-genesis
-  mc put ./{{ network }}/genesis.json gb/golem-base/{{ network }}-l2/genesis.json
-  mc put ./{{ network }}/rollup.json gb/golem-base/{{ network }}-l2/rollup.json
-  mc put ./{{ network }}/state.json gb/golem-base/{{ network }}-l2/state.json
+  mc put ./{{ network }}/genesis.json gb/golem-base/{{ network }}/genesis.json
+  mc put ./{{ network }}/rollup.json gb/golem-base/{{ network }}/rollup.json
+  mc put ./{{ network }}/state.json gb/golem-base/{{ network }}/state.json
 
 # for how to generate the absolute prestate, see op-program's README.
 validate:
