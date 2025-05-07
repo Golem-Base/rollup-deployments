@@ -15,6 +15,8 @@ else
   echo "Execution state already initialized"
 fi
 
+apk add --no-cache jq openssl
+
 cp /artifacts/rollup.json /init
 cp /artifacts/chain-id /init
 
