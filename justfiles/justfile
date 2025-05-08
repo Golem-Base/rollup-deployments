@@ -14,6 +14,8 @@ L1_CHAIN_ID := if network == "holesky" {
   "393530"
 } else if network == "aurora" {
   "17000"
+} else if network == "blackhole" {
+  "393530"
 } else {
   error("Invalid network")
 }
@@ -30,6 +32,8 @@ L2_CHAIN_ID := if network == "holesky" {
   "6296375"
 } else if network == "aurora" {
   "400000"
+} else if network == "blackhole" {
+  "500000"
 } else {
   error("Invalid network")
 }
@@ -69,6 +73,8 @@ L1_RPC_URL := if network == "sepolia" {
   env("L2_RPC_URL")
 } else if network == "aurora" {
   env("L1_RPC_URL")
+} else if network == "blackhole" {
+  env("L2_RPC_URL")
 } else {
   error("Invalid network")
 }
@@ -85,6 +91,8 @@ L2_RPC_URL := if network == "sepolia" {
   env("L3_RPC_URL")
 } else if network == "aurora" {
   env("L2_RPC_URL")
+} else if network == "blackhole" {
+  env("L3_RPC_URL")
 } else { error("Invalid network") }
 
 # Default recipe shows available commands
