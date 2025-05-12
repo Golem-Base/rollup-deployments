@@ -33,7 +33,7 @@ L2_CHAIN_ID := if network == "holesky" {
 } else if network == "aurora" {
   "400000"
 } else if network == "blackhole" {
-  "500000"
+  "500002"
 } else {
   error("Invalid network")
 }
