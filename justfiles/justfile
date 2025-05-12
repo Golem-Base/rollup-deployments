@@ -345,4 +345,4 @@ balances:
     address="${!var}"
 
     echo "$var: $(cast balance $address --ether --rpc-url {{ L2_RPC_URL }})"
-  don
+  done
