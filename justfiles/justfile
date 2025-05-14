@@ -16,6 +16,8 @@ L1_CHAIN_ID := if network == "holesky" {
   "17000"
 } else if network == "blackhole" {
   "393530"
+} else if network == "nova" {
+  "393530"
 } else {
   error("Invalid network")
 }
@@ -34,6 +36,8 @@ L2_CHAIN_ID := if network == "holesky" {
   "400000"
 } else if network == "blackhole" {
   "500002"
+} else if network == "nova" {
+  "550000"
 } else {
   error("Invalid network")
 }
@@ -75,6 +79,8 @@ L1_RPC_URL := if network == "sepolia" {
   env("L1_RPC_URL")
 } else if network == "blackhole" {
   env("L2_RPC_URL")
+} else if network == "nova" {
+  env("L2_RPC_URL")
 } else {
   error("Invalid network")
 }
@@ -92,6 +98,8 @@ L2_RPC_URL := if network == "sepolia" {
 } else if network == "aurora" {
   env("L2_RPC_URL")
 } else if network == "blackhole" {
+  env("L3_RPC_URL")
+} else if network == "nova" {
   env("L3_RPC_URL")
 } else { error("Invalid network") }
 
@@ -117,46 +125,6 @@ list-networks:
     @echo "  - holesky  (L1: 17000)"
     @echo "  - sepolia  (L1: 11155111)"
     @echo "L2 chain network ids: {{ L2_CHAIN_ID }}"
-
-# Generate Optimism environment configuration
-gen-optimism-envrc:
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    # Generate wallets using cast
-    wallets=()
-    for i in {1..5}; do
-        wallets+=("$(cast wallet new)")
-    done
-
-    # Extract addresses and keys
-    {
-        echo "# Configuration for Optimism on {{ network }}"
-        echo
-        echo "# Admin account"
-        echo "export GS_ADMIN_ADDRESS=$(echo "${wallets[0]}" | awk '/Address/ { print $2 }')"
-        echo "export GS_ADMIN_PRIVATE_KEY=$(echo "${wallets[0]}" | awk '/Private key/ { print $3 }')"
-        echo
-        echo "# Batcher account"
-        echo "export GS_BATCHER_ADDRESS=$(echo "${wallets[1]}" | awk '/Address/ { print $2 }')"
-        echo "export GS_BATCHER_PRIVATE_KEY=$(echo "${wallets[1]}" | awk '/Private key/ { print $3 }')"
-        echo
-        echo "# Proposer account"
-        echo "export GS_PROPOSER_ADDRESS=$(echo "${wallets[2]}" | awk '/Address/ { print $2 }')"
-        echo "export GS_PROPOSER_PRIVATE_KEY=$(echo "${wallets[2]}" | awk '/Private key/ { print $3 }')"
-        echo
-        echo "# Sequencer account"
-        echo "export GS_SEQUENCER_ADDRESS=$(echo "${wallets[3]}" | awk '/Address/ { print $2 }')"
-        echo
-        echo "# Challenger account"
-        echo "export GS_CHALLENGER_ADDRESS=$(echo "${wallets[4]}" | awk '/Address/ { print $2 }')"
-        echo "export GS_CHALLENGER_PRIVATE_KEY=$(echo "${wallets[4]}" | awk '/Private key/ { print $3 }')"
-        echo
-        echo "# RPC configuration"
-        echo "export RPC_URL="
-        echo "export L1_RPC_KIND="
-    } > .envrc.optimism-{{ network }}
-    echo ".envrc.optimism-{{ network }} file has been created"
 
 # Clean deployment directory for current network
 [confirm("Are you sure you want to delete the deployment directory?")]
