@@ -1,6 +1,6 @@
 # direnv
 .direnv/
-.envrc.local
+.envrc.local*
 
 # nix
 **/result*
