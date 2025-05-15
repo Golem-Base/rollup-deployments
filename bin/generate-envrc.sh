@@ -81,7 +81,7 @@ for i in "${!ROLES[@]}"; do
     # Append to the output file
     cat >> "$OUTPUT_FILE" << EOL
 # $role account
-export GS_${role}_ADDRESS=0x${address}
+export GS_${role}_ADDRESS=${address}
 export GS_${role}_PRIVATE_KEY=${private_key}
 
 EOL
