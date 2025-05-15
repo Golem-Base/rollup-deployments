@@ -86,7 +86,8 @@ upload_batcher_key() {
 
 upload_sequencer_key() {
   local network="$1"
-  upload_key "$network" "sequencer"
+  # NOTE: we're uploading admin instead of sequencer as is the correct one with permissions
+  upload_key "$network" "admin"
 }
 
 # Generate JWT secret
