@@ -18,6 +18,8 @@ L1_CHAIN_ID := if network == "holesky" {
   "393530"
 } else if network == "nova" {
   "393530"
+} else if network == "kaolin" {
+  "393530"
 } else {
   error("Invalid network")
 }
@@ -38,6 +40,8 @@ L2_CHAIN_ID := if network == "holesky" {
   "500002"
 } else if network == "nova" {
   "550000"
+} else if network == "kaolin" {
+  "600000"
 } else {
   error("Invalid network")
 }
@@ -81,6 +85,8 @@ L1_RPC_URL := if network == "sepolia" {
   env("L2_RPC_URL")
 } else if network == "nova" {
   env("L2_RPC_URL")
+} else if network == "kaolin" {
+  env("L2_RPC_URL")
 } else {
   error("Invalid network")
 }
@@ -100,6 +106,8 @@ L2_RPC_URL := if network == "sepolia" {
 } else if network == "blackhole" {
   env("L3_RPC_URL")
 } else if network == "nova" {
+  env("L3_RPC_URL")
+} else if network == "kaolin" {
   env("L3_RPC_URL")
 } else { error("Invalid network") }
 
