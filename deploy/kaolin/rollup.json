@@ -1,14 +1,14 @@
 {
   "genesis": {
     "l1": {
-      "hash": "0x1f5e1869964ca226858695dc3800dbfd551a4448f7c83a223712641be7ec7eac",
-      "number": 1141077
+      "hash": "0xc5c9692346a5a6ddc2d98f40c7e143aaf6a636fd4482b5be5411ed070976d14e",
+      "number": 1174311
     },
     "l2": {
-      "hash": "0x42863798764f9af10b2fda2e67a7d66c169cdc0445cad3e54a66e9f8eea17f27",
+      "hash": "0x60ab400776b22ece27d1e4daaf3e1e3edd22d0709854fc511c9eac989f2bc52f",
       "number": 0
     },
-    "l2_time": 1747334994,
+    "l2_time": 1747401462,
     "system_config": {
       "batcherAddr": "0x50174bc8072eb891e7f113f8ddabcbbebfd4c916",
       "overhead": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -17,12 +17,12 @@
       "eip1559Params": "0x0000000000000000"
     }
   },
-  "block_time": 1,
+  "block_time": 2,
   "max_sequencer_drift": 600,
   "seq_window_size": 3600,
   "channel_timeout": 300,
   "l1_chain_id": 393530,
-  "l2_chain_id": 600106,
+  "l2_chain_id": 600606,
   "regolith_time": 0,
   "canyon_time": 0,
   "delta_time": 0,
@@ -30,13 +30,14 @@
   "fjord_time": 0,
   "granite_time": 0,
   "holocene_time": 0,
-  "batch_inbox_address": "0x0051a9ded64bf51264d7fcd53c0f8a0855092aaf",
-  "deposit_contract_address": "0xd3c4a77c7cc4b0bd01eb164b9367c3da41a4007d",
-  "l1_system_config_address": "0xea3d421338d41633446e16e39e5efdcfcebfbdce",
-  "protocol_versions_address": "0x6ce67a3bc5ff37e621973b5fe07f5d55594b1f0c",
+  "batch_inbox_address": "0x00527d1c6291b20db7649ed426ad555312e78df1",
+  "deposit_contract_address": "0xf1e3060a45abbb947bb293127641a416bddfc751",
+  "l1_system_config_address": "0x9ef8c09ba229b3169b40303a011562bbeecc968f",
+  "protocol_versions_address": "0x91a16292032404440fd87a10b7a29b589c706ee2",
   "chain_op_config": {
     "eip1559Elasticity": 6,
     "eip1559Denominator": 50,
     "eip1559DenominatorCanyon": 250
   }
 }
+
