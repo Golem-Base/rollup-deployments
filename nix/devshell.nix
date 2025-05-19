@@ -45,6 +45,7 @@ _: {
       packages = with pkgs; [
         age
         alejandra
+        dasel
         diceware
         foundry-bin
         just
