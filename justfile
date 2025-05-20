@@ -1,336 +1,324 @@
-rpc_url := env("ETH_RPC_URL")
-sepolia_chain_id := "11155111"
-holesky_chain_id := "17000"
-mainnet_chain_id := "1"
-deployments_dir := env_var_or_default("PRJ_DATA", ".") + "/deployments"
-chain_ids_file := deployments_dir + "/chain-ids.json"
+# Configuration and constants
+network := ""
 
-# List of known L1 networks
-l1_networks := {
-    "1": "mainnet",
-    "11155111": "sepolia",
-    "17000": "holesky"
+# Chain IDs based on network
+L1_CHAIN_ID := if network == "holesky" {
+  "17000"
+} else if network == "sepolia" {
+  "11155111"
+} else if network == "holesky-l3" {
+  "393530"
+} else if network == "sepolia-l3" {
+  "393531"
+} else if network == "laika" {
+  "393530"
+} else if network == "aurora" {
+  "17000"
+} else if network == "blackhole" {
+  "393530"
+} else if network == "nova" {
+  "393530"
+} else if network == "kaolin" {
+  "393530"
+} else {
+  error("Invalid network")
 }
 
+L2_CHAIN_ID := if network == "holesky" {
+  "393530"
+} else if network == "sepolia" {
+  "393531"
+} else if network == "holesky-l3" {
+  "934720"
+} else if network == "laika" {
+  "934730"
+} else if network == "sepolia-l3" {
+  "6296375"
+} else if network == "aurora" {
+  "400000"
+} else if network == "blackhole" {
+  "500002"
+} else if network == "nova" {
+  "550000"
+} else if network == "kaolin" {
+  "600106"
+} else {
+  error("Invalid network")
+}
+
+# Deployment constants
+L1_CONTRACTS_RELEASE := "op-contracts/v2.0.0-rc.1"
+
+# NOTE: The artifacts checksum is computed using the following script:
+# The artifact is calculated on the gb/op-contracts/v2.0.0-rc.1 branch.
+# URL: https://github.com/ethereum-optimism/optimism/blob/develop/packages/contracts-bedrock/scripts/ops/calculate-checksum.sh
+# Using a tag brings in all kinds of side effects (cf. https://github.com/ethereum-optimism/optimism/tree/e1516f01b379868f50fd3610a89daf0a560277f4/gb-deployer/pkg/deployer/pipeline/init.go#L41), so we stick to an artifact.
+L1_CHECKSUM := "1e788c684d48232a85cf5f5bd3876e83d6d2240c80588f60e160faca0133eac8"
+
+L1_ARTIFACTS_LOCATOR := "https://storage.googleapis.com/oplabs-contract-artifacts/artifacts-v1-" + L1_CHECKSUM + ".tar.gz"
+L2_ARTIFACTS_LOCATOR := "tag://op-contracts/v1.7.0-beta.1+l2-contracts"
+
+# NOTE: Cf. https://specs.optimism.io/protocol/superchain-upgrades.html#op-stack-protocol-versions
+PROTOCOL_VERSION := "0x0000000000000000000000000000000000000009000000000000000000000000"
+
+# Load required environment variables with validation
+GS_ADMIN_ADDRESS := env("GS_ADMIN_ADDRESS")
+GS_ADMIN_PRIVATE_KEY := env("GS_ADMIN_PRIVATE_KEY")
+GS_BATCHER_ADDRESS := env("GS_BATCHER_ADDRESS")
+GS_CHALLENGER_ADDRESS := env("GS_CHALLENGER_ADDRESS")
+GS_PROPOSER_ADDRESS := env("GS_PROPOSER_ADDRESS")
+GS_SEQUENCER_ADDRESS := env("GS_SEQUENCER_ADDRESS")
+
+L1_RPC_URL := if network == "sepolia" {
+  env("L1_RPC_URL")
+} else if network == "holesky" {
+  env("L1_RPC_URL")
+} else if network == "holesky-l3" {
+  env("L2_RPC_URL")
+} else if network == "sepolia-l3" {
+  env("L2_RPC_URL")
+} else if network == "laika" {
+  env("L2_RPC_URL")
+} else if network == "aurora" {
+  env("L1_RPC_URL")
+} else if network == "blackhole" {
+  env("L2_RPC_URL")
+} else if network == "nova" {
+  env("L2_RPC_URL")
+} else if network == "kaolin" {
+  env("L2_RPC_URL")
+} else {
+  error("Invalid network")
+}
+
+L2_RPC_URL := if network == "sepolia" {
+  env("L2_RPC_URL")
+} else if network == "holesky" {
+  env("L2_RPC_URL")
+} else if network == "holesky-l3" {
+  env("L3_RPC_URL")
+} else if network == "sepolia-l3" {
+  env("L3_RPC_URL")
+} else if network == "laika" {
+  env("L3_RPC_URL")
+} else if network == "aurora" {
+  env("L2_RPC_URL")
+} else if network == "blackhole" {
+  env("L3_RPC_URL")
+} else if network == "nova" {
+  env("L3_RPC_URL")
+} else if network == "kaolin" {
+  env("L3_RPC_URL")
+} else { error("Invalid network") }
+
+# Default recipe shows available commands
+[private]
 default:
     @just --list
 
-# Initialize the chain-ids.json file if it doesn't exist
-init-chain-ids:
-    #!/usr/bin/env bash
-    set -euo pipefail
+# Show current configuration
+[no-exit-message]
+config:
+    @echo "Current configuration:"
+    @echo "  Network:              {{ network }}"
+    @echo "  L1 Chain ID:          {{ L1_CHAIN_ID }}"
+    @echo "  L2 Chain IDs:         {{ L2_CHAIN_ID }}"
+    @echo "  L1 Contracts Release: {{ L1_CONTRACTS_RELEASE }}"
+    @echo "  L1 RPC URL:           {{ L1_RPC_URL }}"
+    @echo "  Work Directory:       ./{{ network }}"
 
-    # Create deployments directory if it doesn't exist
-    mkdir -p "{{deployments_dir}}"
+# List available networks
+list-networks:
+    @echo "Available networks:"
+    @echo "  - holesky  (L1: 17000)"
+    @echo "  - sepolia  (L1: 11155111)"
+    @echo "L2 chain network ids: {{ L2_CHAIN_ID }}"
 
-    # Check if chain-ids.json exists
-    if [ ! -f "{{chain_ids_file}}" ]; then
-        # Create initial structure with L1 networks
-        cat > "{{chain_ids_file}}" << EOF
-[
-  {
-    "name": "mainnet",
-    "chain-id": 1,
-    "rollups": []
-  },
-  {
-    "name": "sepolia",
-    "chain-id": 11155111,
-    "rollups": []
-  },
-  {
-    "name": "holesky",
-    "chain-id": 17000,
-    "rollups": []
-  }
-]
-EOF
-        echo "Created initial chain-ids.json file"
-    else
-        echo "chain-ids.json already exists"
+# Clean deployment directory for current network
+[confirm("Are you sure you want to delete the deployment directory?")]
+[no-exit-message]
+clean:
+    @if [ -d "./{{ network }}" ]; then \
+        echo "Removing directory: ./{{ network }}"; \
+        rm -rf "./{{ network }}"; \
+    else \
+        echo "Directory does not exist: ./{{ network }}"; \
     fi
 
-# Generate a network name and ID
-gen-network-name-id:
-    #!/usr/bin/env bash
-    name=$(diceware -n 1 -w "en_adjectives")$(diceware -n 1 -w "en_nouns")
-    full_hash=$(cast keccak "$name")
-    id=$((16#${full_hash:2:6}))
-    echo "$name $id"
+_create_workdir:
+    mkdir -p ./{{ network }}
 
-# Find a network in the chain-ids.json file by chain ID
-find-network chain_id:
-    #!/usr/bin/env bash
-    set -euo pipefail
+# Initialize deployment configuration
+init: _create_workdir
+    gb-deployer init \
+        --l1-chain-id {{ L1_CHAIN_ID }} \
+        --l2-chain-ids {{ L2_CHAIN_ID }} \
+        --workdir ./{{ network }} \
+        --intent-config-type custom
 
-    # Make sure chain-ids.json exists
-    if [ ! -f {{chain_ids_file}}" ]; then
-        just init-chain-ids
-    fi
+    # Set chain parameters (with these constants)
+    dasel put -f ./{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559DenominatorCanyon" -v 250
+    dasel put -f ./{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Denominator" -v 50
+    dasel put -f ./{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Elasticity" -v 6
 
-    # Find the network in the chain-ids.json file
-    # This function recursively searches the JSON structure using jq
-    find_result=$(jq -r --arg chain_id "{{chain_id}}" '
-      # Recursive function to find a path to an object with the given chain-id
-      def find_path($id; $current_path):
-        # Check if current object has the chain-id
-        if .["chain-id"] == ($id | tonumber) then
-          $current_path
-        # If it has rollups, search them
-        elif .rollups then
-          # Try each rollup
-          [.rollups[] | . as $child |
-            ($current_path + "/" + $child.name) as $new_path |
-            find_path($id; $new_path)] |
-          # Return the first non-empty result
-          map(select(length > 0)) | if length > 0 then .[0] else "" end
-        else
-          ""
-        end;
+    # Set contract locators
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string -v "{{ L1_ARTIFACTS_LOCATOR }}" "l1ContractsLocator"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string -v "{{ L2_ARTIFACTS_LOCATOR }}" "l2ContractsLocator"
 
-      # Apply to each top-level network
-      [.[] | . as $network |
-        $network.name as $name |
-        find_path($chain_id; $name)] |
-      # Return the first non-empty result
-      map(select(length > 0)) | if length > 0 then .[0] else "" end
-    ' "{{chain_ids_file}}")
+# Bootstrap superchain configuration
+[no-exit-message]
+bootstrap-superchain:
+    gb-deployer bootstrap superchain \
+        --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
+        --l1-rpc-url {{ L1_RPC_URL }} \
+        --artifacts-locator {{ L1_ARTIFACTS_LOCATOR }} \
+        --guardian {{ GS_ADMIN_ADDRESS }} \
+        --recommended-protocol-version {{ PROTOCOL_VERSION }} \
+        --required-protocol-version {{ PROTOCOL_VERSION }} \
+        --superchain-proxy-admin-owner {{ GS_ADMIN_ADDRESS }} \
+        --protocol-versions-owner {{ GS_ADMIN_ADDRESS }} \
+        --outfile ./{{ network }}/superchain.json
 
-    if [ -n "$find_result" ]; then
-        echo "$find_result"
-        exit 0
-    else
-        echo "unknown-network-{{chain_id}}"
-        exit 1
-    fi
+    # Set all roles
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "superchainRoles.proxyAdminOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "superchainRoles.protocolVersionsOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "superchainRoles.guardian" -v "{{ GS_ADMIN_ADDRESS }}"
 
-# Get the network path based on chain ID
-get-network:
-    #!/usr/bin/env bash
-    set -euo pipefail
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].baseFeeVaultRecipient" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].l1FeeVaultRecipient" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].sequencerFeeVaultRecipient" -v "{{ GS_ADMIN_ADDRESS }}"
 
-    # Get chain ID using cast
-    chain_id=$(cast chain-id --rpc-url {{rpc_url}})
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.l1ProxyAdminOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.l2ProxyAdminOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.systemConfigOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.unsafeBlockSigner" -v "{{ GS_ADMIN_ADDRESS }}"
 
-    just find-network $chain_id
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.batcher" -v "{{ GS_BATCHER_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.challenger" -v "{{ GS_CHALLENGER_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.sequencer" -v "{{ GS_SEQUENCER_ADDRESS }}"
+    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.proposer" -v "{{ GS_PROPOSER_ADDRESS }}"
 
-# Update chain-ids.json by adding a new rollup
-add-rollup parent_path name chain_id:
-    #!/usr/bin/env bash
-    set -euo pipefail
+# Bootstrap implementations
+[no-exit-message]
+@bootstrap-implementations:
+    # NOTE: these addresses end up in the OPCM
+    gb-deployer bootstrap implementations \
+        --superchain-config-proxy "$(jq -r .SuperchainConfigProxy ./{{ network }}/superchain.json)" \
+        --protocol-versions-proxy "$(jq -r .ProtocolVersionsProxy ./{{ network }}/superchain.json)" \
+        --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
+        --l1-rpc-url {{ L1_RPC_URL }} \
+        --artifacts-locator {{ L1_ARTIFACTS_LOCATOR }} \
+        --l1-contracts-release {{ L1_CONTRACTS_RELEASE }} \
+        --upgrade-controller {{ GS_ADMIN_ADDRESS }} \
+        --gb-superchain-proxy-admin "$(jq -r .SuperchainProxyAdmin ./{{ network }}/superchain.json)" \
+        --outfile ./{{ network }}/implementations.json
 
-    # Make sure chain-ids.json exists
-    if [ ! -f "{{chain_ids_file}}" ]; then
-        just init-chain-ids
-    fi
+# Bootstrap proxy configuration
+[no-exit-message]
+bootstrap-proxy:
+    gb-deployer bootstrap proxy \
+        --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
+        --l1-rpc-url {{ L1_RPC_URL }} \
+        --artifacts-locator {{ L1_ARTIFACTS_LOCATOR }} \
+        --proxy-owner {{ GS_ADMIN_ADDRESS }} \
+        --outfile ./{{ network }}/proxy.json
 
-    # Parse the parent path to get the components
-    IFS="/" read -ra path_components <<< "{{parent_path}}"
+# Apply all configurations
+[no-exit-message]
+apply:
+    gb-deployer apply \
+        --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
+        --l1-rpc-url {{ L1_RPC_URL }} \
+        --workdir ./{{ network }}
 
-    # Build the jq filter
-    jq_filter='
-    # Convert chain ID to number
-    $chain_id | tonumber as $chain_id_num |
+# Run complete deployment sequence
+deploy: init bootstrap-superchain bootstrap-implementations bootstrap-proxy apply
+    echo Deployed!
 
-    # Function to check if a chain ID already exists
-    def chain_id_exists($id):
-      walk(if type == "object" and has("chain-id") and .["chain-id"] == $id then true else . end) |
-      contains(true);
+# These steps should not be performed on each deploy, as they create the initial state.
+# NOTE: Changes to these two files should usually be deployed in sync, because rollup.json depends on values in genesis.json.
+# If you run this with an existing L2 chain running in a node, you probably want to delete op-geth's state directory, so that op-geth-init is run again. Otherwise op-node might refuse to start.
+create-genesis:
+   gb-deployer inspect genesis \
+        --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} \
+        > ./{{ network }}/genesis.json
 
-    # Check if chain ID already exists
-    if chain_id_exists($chain_id_num) then
-      "chain-id-exists"
-    else
-      # Main update function
-      def update_at_path($components; $idx; $name; $chain_id):
-        # Base case: if we reached the end of components, add the new rollup
-        if $idx >= ($components | length) then
-          .rollups += [{
-            "name": $name,
-            "chain-id": $chain_id,
-            "rollups": []
-          }]
-        # Recursive case: navigate to the next component
-        else
-          # Get the current component
-          $components[$idx] as $current |
+   gb-deployer inspect rollup \
+        --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} \
+        > ./{{ network }}/rollup.json
 
-          # Find the index of the current component in rollups
-          (.rollups | map(.name == $current) | index(true)) as $rollup_idx |
+push-jsons: create-genesis
+  mc put ./{{ network }}/genesis.json gb/golem-base/{{ network }}/genesis.json
+  mc put ./{{ network }}/rollup.json gb/golem-base/{{ network }}/rollup.json
+  mc put ./{{ network }}/state.json gb/golem-base/{{ network }}/state.json
 
-          # If component exists in rollups, update that rollup
-          if $rollup_idx != null then
-            .rollups[$rollup_idx] |= update_at_path($components; $idx + 1; $name; $chain_id)
-          # If at the top level, check main networks
-          elif $idx == 0 then
-            "invalid-path"
-          else
-            "invalid-path"
-          end
-        end;
+# for how to generate the absolute prestate, see op-program's README.
+validate:
+  op-validator validate v2.0.0 \
+    --l1-rpc-url {{ L1_RPC_URL }} \
+    --l2-chain-id {{ L2_CHAIN_ID }} \
+    --proxy-admin $(gb-deployer inspect l1  --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.proxyAdminAddress) \
+    --absolute-prestate 0x03b357b30095022ecbb44ef00d1de19df39cf69ee92a60683a6be2c6f8fe6a3e \
+    --system-config $(gb-deployer inspect l1  --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.systemConfigProxyAddress)
 
-      # Start with empty components for the "all" case
-      [] as $components |
+# move some ETH from L admin to L proposer and batcher
+fund value:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  set -x
 
-      if {{parent_path | tojson}} == "all" then
-        # Adding directly to root
-        . += [{
-          "name": $name,
-          "chain-id": $chain_id_num,
-          "rollups": []
-        }]
-      else
-        # Regular path
-        {{parent_path | split("/") | tojson}} as $path_components |
+  for var in GS_BATCHER_ADDRESS GS_PROPOSER_ADDRESS; do
+    address="${!var}"
 
-        # Find the top-level network
-        map(
-          if .name == $path_components[0] then
-            # Found the top-level network, now update it
-            update_at_path($path_components; 1; $name; $chain_id_num)
-          else
-            .
-          end
-        )
-      end
-    end
-    '
+    cast send \
+      --quiet \
+      --rpc-url {{ L1_RPC_URL }} \
+      --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
+      --value {{ value }} \
+      $address
 
-    # Apply the filter
-    result=$(jq --arg name "{{name}}" --arg chain_id "{{chain_id}}" "$jq_filter" "{{chain_ids_file}}")
+    echo "New balance ($var): $(cast balance $recipient --ether --rpc-url {{ L1_RPC_URL }})"
+  done
 
-    # Check for special result codes
-    if [ "$result" = "\"chain-id-exists\"" ]; then
-        echo "❌ Error: Chain ID {{chain_id}} already exists in chain-ids.json"
-        exit 1
-    elif [ "$result" = "\"invalid-path\"" ]; then
-        echo "❌ Error: Invalid path {{parent_path}}"
-        exit 1
-    else
-        # Update the file
-        echo "$result" > "{{chain_ids_file}}"
-        echo "Updated chain-ids.json: Added {{name}} ({{chain_id}}) to {{parent_path}}"
-    fi
 
-# Set up a deployment directory for the current network
-setup-deployment-dir name="":
-    #!/usr/bin/env bash
-    set -euo pipefail
+# TODO: should error if balance doesn't update by correct amount
+# deposit funds from L to L+1 accounts of admin (for withdrawal testing), batcher, proposer
+bridge value:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  set -x
 
-    # Make sure chain-ids.json exists
-    if [ ! -f "{{chain_ids_file}}" ]; then
-        just init-chain-ids
-    fi
+  for var in GS_ADMIN_ADDRESS GS_BATCHER_ADDRESS GS_PROPOSER_ADDRESS; do
+    address="${!var}"
 
-    # Get current chain ID
-    chain_id=$(cast chain-id --rpc-url {{rpc_url}})
+    cast send \
+      --quiet \
+      --gas-limit 2000000 \
+      --rpc-url {{ L1_RPC_URL }} \
+      --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
+      --value {{ value }} \
+      $(gb-deployer inspect l1  --workdir ./{{ network }} {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.l1StandardBridgeProxyAddress) \
+      "bridgeETHTo(address _to, uint32 _minGasLimit, bytes calldata _extraData)" \
+        $address \
+        1000000 \
+        $(cast to-bytes32 "")
+  done
 
-    # Use provided name or generate one
-    deployment_name="{{name}}"
-    if [ -z "$deployment_name" ]; then
-        name_and_id=$(just gen-network-name-id)
-        deployment_name=$(echo "$name_and_id" | cut -d' ' -f1)
-    fi
+balances:
+  #!/usr/bin/env bash
+  set -euo pipefail
 
-    # Check if it's a known L1
-    if [[ -n "{{l1_networks[$chain_id]:-}}" ]]; then
-        # We're deploying directly on an L1
-        l1="{{l1_networks[$chain_id]}}"
+  echo "### L"
+  for var in GS_ADMIN_ADDRESS GS_BATCHER_ADDRESS GS_PROPOSER_ADDRESS; do
+    address="${!var}"
 
-        # Create the L1 directory if it doesn't exist
-        l1_dir="{{deployments_dir}}/$l1"
-        mkdir -p "$l1_dir"
+    echo "$var: $(cast balance $address --ether --rpc-url {{ L1_RPC_URL }})"
+  done
 
-        # Check if the deployment directory already exists
-        deployment_dir="$l1_dir/$deployment_name"
-        if [ -d "$deployment_dir" ]; then
-            echo "❌ Error: Deployment directory $deployment_dir already exists"
-            exit 1
-        fi
+  echo
+  echo "### L+1"
+  for var in GS_ADMIN_ADDRESS GS_BATCHER_ADDRESS GS_PROPOSER_ADDRESS; do
+    address="${!var}"
 
-        # Create deployment directory
-        mkdir -p "$deployment_dir"
-
-        # Generate a chain ID for this L2 if not provided
-        if [ -z "{{name}}" ]; then
-            l2_chain_id=$(echo "$name_and_id" | cut -d' ' -f2)
-        else
-            l2_chain_id=$((16#$(cast keccak "{{name}}" | cut -c 3-8)))
-        fi
-
-        # Update chain-ids.json
-        just add-rollup "$l1" "$deployment_name" "$l2_chain_id"
-
-        echo "Created new L2 deployment in L1 ($l1):"
-        echo "Directory: $deployment_dir"
-        echo "Network Name: $deployment_name"
-        echo "Chain ID: $l2_chain_id"
-
-    else
-        # We're not on an L1, so we need to find the parent chain
-        parent_path=""
-
-        # Try to get the network path
-        parent_path=$(just get-network 2>/dev/null || echo "")
-
-        if [ -z "$parent_path" ] || [[ "$parent_path" == unknown-network-* ]]; then
-            echo "❌ Error: Cannot find parent chain for chain ID $chain_id"
-            echo "You need to connect to an L1 or a known rollup to deploy a new layer"
-            exit 1
-        fi
-
-        echo "Found parent chain: $parent_path"
-
-        # Create the deployment directory
-        full_path="$parent_path/$deployment_name"
-        deployment_dir="{{deployments_dir}}/$full_path"
-
-        if [ -d "$deployment_dir" ]; then
-            echo "❌ Error: Deployment directory $deployment_dir already exists"
-            exit 1
-        fi
-
-        # Create deployment directory
-        mkdir -p "$deployment_dir"
-
-        # Generate a chain ID for this new layer if not provided
-        if [ -z "{{name}}" ]; then
-            new_chain_id=$(echo "$name_and_id" | cut -d' ' -f2)
-        else
-            new_chain_id=$((16#$(cast keccak "{{name}}" | cut -c 3-8)))
-        fi
-
-        # Update chain-ids.json
-        just add-rollup "$parent_path" "$deployment_name" "$new_chain_id"
-
-        echo "Created new deployment under parent chain:"
-        echo "Directory: $deployment_dir"
-        echo "Network Name: $deployment_name"
-        echo "Chain ID: $new_chain_id"
-    fi
-
-    # Write a README.md in the deployment directory with basic info
-    cat > "$deployment_dir/README.md" << EOF
-# $deployment_name Deployment
-
-This directory contains deployment artifacts for the "$deployment_name" rollup.
-
-- **Path:** $(realpath --relative-to="{{deployments_dir}}" "$deployment_dir")
-- **Created:** $(date)
-EOF
-
-    # Return the deployment name
-    echo "$deployment_name"
-
-# Pretty-print the chain-ids.json file
-show-networks:
-    #!/usr/bin/env bash
-    set -euo pipefail
-
-    # Make sure chain-ids.json exists
-    if [ ! -f "{{chain_ids_file}}" ]; then
-        just init-chain-ids
-    fi
-
-    # Pretty-print the JSON
-    jq '.' "{{chain_ids_file}}"
+    echo "$var: $(cast balance $address --ether --rpc-url {{ L2_RPC_URL }})"
+  done
