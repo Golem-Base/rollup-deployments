@@ -66,7 +66,7 @@ echo "Generating accounts for all roles..."
 
 # Generate all wallets in one go
 WALLET_COUNT=${#ROLES[@]}
-WALLETS_JSON=$(cast wallet new -n $WALLET_COUNT --json)
+WALLETS_JSON=$(cast wallet new -n "$WALLET_COUNT" --json)
 
 # Loop through the generated wallets and assign them to roles
 for i in "${!ROLES[@]}"; do
