@@ -49,6 +49,7 @@ _: {
         diceware
         foundry-bin
         just
+        openssl
         minio-client
         sops
         ssh-to-age
