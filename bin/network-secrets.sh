@@ -29,7 +29,8 @@ generate_bootnode_secrets() {
   done
 
   # Upload keys to Doppler
-  local network_upper=$(uppercase "$network")
+  local network_upper
+  network_upper=$(uppercase "$network")
   echo "Uploading keys to Doppler..."
   doppler secrets set \
     "${network_upper}_PUBLIC_BOOTNODE_${bootnode_number}_CONSENSUS_P2P_PRIVATE_KEY=$CONSENSUS_KEY" \
@@ -55,7 +56,8 @@ upload_key() {
   local network="$1"
   local role="$2"
 
-  local role_upper=$(uppercase "$role")
+  local role_upper
+  role_upper=$(uppercase "$role")
   local ENV_VAR="GS_${role_upper}_PRIVATE_KEY"
 
   if [ -z "${!ENV_VAR:-}" ]; then
@@ -64,7 +66,8 @@ upload_key() {
   fi
 
   echo "Uploading ${role} key from environment variable..."
-  local network_upper=$(uppercase "$network")
+  local network_upper
+  network_upper=$(uppercase "$network")
   doppler secrets set \
     "${network_upper}_${role_upper}_PRIVATE_KEY=${!ENV_VAR}" \
     --project $DOPPLER_PROJECT \
@@ -98,6 +101,8 @@ generate_jwt_secret() {
   JWT=$(openssl rand -hex 32 | tr -d "\n")
 
   echo "Setting JWT secret in Doppler..."
+  local network_upper
+  network_upper=$(uppercase "$network")
   doppler secrets set "${network_upper}_JWT_SECRET=$JWT" \
     --project $DOPPLER_PROJECT \
     --config $DOPPLER_CONFIG

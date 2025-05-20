@@ -1,5 +1,5 @@
 #!/bin/sh
-set -exuo pipefail
+set -exu
 
 for dir in "/init" "/execution" "/artifacts"; do
   if [ ! -d "$dir" ]; then
@@ -27,7 +27,7 @@ if [ -n "${POD_NAME:-}" ]; then
 
   if [ -n "${POD_BASE_NAME:-}" ]; then
     namespace=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace)
-    service_fqdn="$POD_BASE_NAME.$namespace.svc.cluster.local"     
+    service_fqdn="$POD_BASE_NAME.$namespace.svc.cluster.local"
     if getent hosts "$service_fqdn" > /dev/null 2>&1; then
       IP=$(getent hosts "$POD_BASE_NAME.$namespace.svc.cluster.local" | awk '{ print $1 }')
       if [ -n "${IP:-}" ]; then
@@ -43,7 +43,7 @@ if [ -n "${POD_NAME:-}" ]; then
     PEERS_JSON_PATH="/peers/peers.json"
     if [ -f "$PEERS_JSON_PATH" ]; then
       PEERS_JSON=$(jq -r --arg pod_base_name "$POD_BASE_NAME" '.[] | select(.name != $pod_base_name)' $PEERS_JSON_PATH)
-      echo -e "Found peers: \n$PEERS_JSON\n"
+      printf "Found peers: \n%s\n" "$PEERS_JSON"
 
       echo "$PEERS_JSON" \
         | jq -r ".consensus" \
@@ -67,7 +67,7 @@ $EXECUTION_PEERS
 ]
 EOF
     else
-      echo "$PEERS_JSON_PATH does not exist, skipping op-node and op-geth static peer construction" 
+      echo "$PEERS_JSON_PATH does not exist, skipping op-node and op-geth static peer construction"
     fi
   else
     echo "Failed to extract POD_BASE_NAME from POD_NAME: $POD_NAME"
