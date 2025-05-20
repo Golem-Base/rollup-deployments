@@ -247,7 +247,7 @@ create-genesis:
         --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} \
         > ./{{ network }}/rollup.json
 
-push-jsons: create-genesis
+upload-jsons: create-genesis
   mc put ./{{ network }}/genesis.json gb/golem-base/{{ network }}/genesis.json
   mc put ./{{ network }}/rollup.json gb/golem-base/{{ network }}/rollup.json
   mc put ./{{ network }}/state.json gb/golem-base/{{ network }}/state.json
