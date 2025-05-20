@@ -19,7 +19,7 @@ generate_bootnode_secrets() {
 
   # Create temporary directory for storing keys
   TMPDIR=$(mktemp -d -t bootnode-keys.XXXXXXXXXX)
-  trap 'rm -rf "$TMPDIR"' EXIT
+  trap 'find $TMPDIR -type f -exec shred --zero --remove {} \;' EXIT
 
   # Generate keys
   for key_type in "consensus" "execution"; do
@@ -94,14 +94,8 @@ upload_sequencer_key() {
 generate_jwt_secret() {
   local network="$1"
 
-  TMPDIR=$(mktemp -d -t jwt-secret.XXXXXXXXXX)
-  trap 'rm -rf "$TMPDIR"' EXIT
-
   echo "Generating JWT secret..."
-  openssl rand -hex 32 | tr -d "\n" > "$TMPDIR/jwt-secret.txt"
-
-  JWT=$(cat "$TMPDIR/jwt-secret.txt")
-  local network_upper=$(uppercase "$network")
+  JWT=$(openssl rand -hex 32 | tr -d "\n")
 
   echo "Setting JWT secret in Doppler..."
   doppler secrets set "${network_upper}_JWT_SECRET=$JWT" \
