@@ -133,7 +133,7 @@ config:
     @echo "  L2 Chain IDs:         {{ L2_CHAIN_ID }}"
     @echo "  L1 Contracts Release: {{ L1_CONTRACTS_RELEASE }}"
     @echo "  L1 RPC URL:           {{ L1_RPC_URL }}"
-    @echo "  Work Directory:       ./{{ network }}"
+    @echo "  Work Directory:       ./deploy/{{ network }}"
 
 # List available networks
 list-networks:
@@ -146,32 +146,32 @@ list-networks:
 [confirm("Are you sure you want to delete the deployment directory?")]
 [no-exit-message]
 clean:
-    @if [ -d "./{{ network }}" ]; then \
-        echo "Removing directory: ./{{ network }}"; \
-        rm -rf "./{{ network }}"; \
+    @if [ -d "./deploy/{{ network }}" ]; then \
+        echo "Removing directory: ./deploy/{{ network }}"; \
+        rm -rf "./deploy/{{ network }}"; \
     else \
-        echo "Directory does not exist: ./{{ network }}"; \
+        echo "Directory does not exist: ./deploy/{{ network }}"; \
     fi
 
 _create_workdir:
-    mkdir -p ./{{ network }}
+    mkdir -p ./deploy/{{ network }}
 
 # Initialize deployment configuration
 init: _create_workdir
     gb-deployer init \
         --l1-chain-id {{ L1_CHAIN_ID }} \
         --l2-chain-ids {{ L2_CHAIN_ID }} \
-        --workdir ./{{ network }} \
+        --workdir ./deploy/{{ network }} \
         --intent-config-type custom
 
     # Set chain parameters (with these constants)
-    dasel put -f ./{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559DenominatorCanyon" -v 250
-    dasel put -f ./{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Denominator" -v 50
-    dasel put -f ./{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Elasticity" -v 6
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559DenominatorCanyon" -v 250
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Denominator" -v 50
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Elasticity" -v 6
 
     # Set contract locators
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string -v "{{ L1_ARTIFACTS_LOCATOR }}" "l1ContractsLocator"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string -v "{{ L2_ARTIFACTS_LOCATOR }}" "l2ContractsLocator"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string -v "{{ L1_ARTIFACTS_LOCATOR }}" "l1ContractsLocator"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string -v "{{ L2_ARTIFACTS_LOCATOR }}" "l2ContractsLocator"
 
 # Bootstrap superchain configuration
 [no-exit-message]
@@ -185,41 +185,41 @@ bootstrap-superchain:
         --required-protocol-version {{ PROTOCOL_VERSION }} \
         --superchain-proxy-admin-owner {{ GS_ADMIN_ADDRESS }} \
         --protocol-versions-owner {{ GS_ADMIN_ADDRESS }} \
-        --outfile ./{{ network }}/superchain.json
+        --outfile ./deploy/{{ network }}/superchain.json
 
     # Set all roles
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "superchainRoles.proxyAdminOwner" -v "{{ GS_ADMIN_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "superchainRoles.protocolVersionsOwner" -v "{{ GS_ADMIN_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "superchainRoles.guardian" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "superchainRoles.proxyAdminOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "superchainRoles.protocolVersionsOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "superchainRoles.guardian" -v "{{ GS_ADMIN_ADDRESS }}"
 
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].baseFeeVaultRecipient" -v "{{ GS_ADMIN_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].l1FeeVaultRecipient" -v "{{ GS_ADMIN_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].sequencerFeeVaultRecipient" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].baseFeeVaultRecipient" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].l1FeeVaultRecipient" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].sequencerFeeVaultRecipient" -v "{{ GS_ADMIN_ADDRESS }}"
 
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.l1ProxyAdminOwner" -v "{{ GS_ADMIN_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.l2ProxyAdminOwner" -v "{{ GS_ADMIN_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.systemConfigOwner" -v "{{ GS_ADMIN_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.unsafeBlockSigner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].roles.l1ProxyAdminOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].roles.l2ProxyAdminOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].roles.systemConfigOwner" -v "{{ GS_ADMIN_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].roles.unsafeBlockSigner" -v "{{ GS_ADMIN_ADDRESS }}"
 
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.batcher" -v "{{ GS_BATCHER_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.challenger" -v "{{ GS_CHALLENGER_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.sequencer" -v "{{ GS_SEQUENCER_ADDRESS }}"
-    dasel put -f ./{{ network }}/intent.toml -r toml -t string "chains.[0].roles.proposer" -v "{{ GS_PROPOSER_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].roles.batcher" -v "{{ GS_BATCHER_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].roles.challenger" -v "{{ GS_CHALLENGER_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].roles.sequencer" -v "{{ GS_SEQUENCER_ADDRESS }}"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].roles.proposer" -v "{{ GS_PROPOSER_ADDRESS }}"
 
 # Bootstrap implementations
 [no-exit-message]
 @bootstrap-implementations:
     # NOTE: these addresses end up in the OPCM
     gb-deployer bootstrap implementations \
-        --superchain-config-proxy "$(jq -r .SuperchainConfigProxy ./{{ network }}/superchain.json)" \
-        --protocol-versions-proxy "$(jq -r .ProtocolVersionsProxy ./{{ network }}/superchain.json)" \
+        --superchain-config-proxy "$(jq -r .SuperchainConfigProxy ./deploy/{{ network }}/superchain.json)" \
+        --protocol-versions-proxy "$(jq -r .ProtocolVersionsProxy ./deploy/{{ network }}/superchain.json)" \
         --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
         --l1-rpc-url {{ L1_RPC_URL }} \
         --artifacts-locator {{ L1_ARTIFACTS_LOCATOR }} \
         --l1-contracts-release {{ L1_CONTRACTS_RELEASE }} \
         --upgrade-controller {{ GS_ADMIN_ADDRESS }} \
-        --gb-superchain-proxy-admin "$(jq -r .SuperchainProxyAdmin ./{{ network }}/superchain.json)" \
-        --outfile ./{{ network }}/implementations.json
+        --gb-superchain-proxy-admin "$(jq -r .SuperchainProxyAdmin ./deploy/{{ network }}/superchain.json)" \
+        --outfile ./deploy/{{ network }}/implementations.json
 
 # Bootstrap proxy configuration
 [no-exit-message]
@@ -229,7 +229,7 @@ bootstrap-proxy:
         --l1-rpc-url {{ L1_RPC_URL }} \
         --artifacts-locator {{ L1_ARTIFACTS_LOCATOR }} \
         --proxy-owner {{ GS_ADMIN_ADDRESS }} \
-        --outfile ./{{ network }}/proxy.json
+        --outfile ./deploy/{{ network }}/proxy.json
 
 # Apply all configurations
 [no-exit-message]
@@ -237,7 +237,7 @@ apply:
     gb-deployer apply \
         --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
         --l1-rpc-url {{ L1_RPC_URL }} \
-        --workdir ./{{ network }}
+        --workdir ./deploy/{{ network }}
 
 # Run complete deployment sequence
 deploy: init bootstrap-superchain bootstrap-implementations bootstrap-proxy apply
@@ -248,26 +248,26 @@ deploy: init bootstrap-superchain bootstrap-implementations bootstrap-proxy appl
 # If you run this with an existing L2 chain running in a node, you probably want to delete op-geth's state directory, so that op-geth-init is run again. Otherwise op-node might refuse to start.
 create-genesis:
    gb-deployer inspect genesis \
-        --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} \
-        > ./{{ network }}/genesis.json
+        --workdir ./deploy/{{ network }}/ {{ L2_CHAIN_ID }} \
+        > ./deploy/{{ network }}/genesis.json
 
    gb-deployer inspect rollup \
-        --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} \
-        > ./{{ network }}/rollup.json
+        --workdir ./deploy/{{ network }}/ {{ L2_CHAIN_ID }} \
+        > ./deploy/{{ network }}/rollup.json
 
 upload-jsons: create-genesis
-  mc put ./{{ network }}/genesis.json gb/golem-base/{{ network }}/genesis.json
-  mc put ./{{ network }}/rollup.json gb/golem-base/{{ network }}/rollup.json
-  mc put ./{{ network }}/state.json gb/golem-base/{{ network }}/state.json
+  mc put ./deploy/{{ network }}/genesis.json gb/golem-base/{{ network }}/genesis.json
+  mc put ./deploy/{{ network }}/rollup.json gb/golem-base/{{ network }}/rollup.json
+  mc put ./deploy/{{ network }}/state.json gb/golem-base/{{ network }}/state.json
 
 # for how to generate the absolute prestate, see op-program's README.
 validate:
   op-validator validate v2.0.0 \
     --l1-rpc-url {{ L1_RPC_URL }} \
     --l2-chain-id {{ L2_CHAIN_ID }} \
-    --proxy-admin $(gb-deployer inspect l1  --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.proxyAdminAddress) \
+    --proxy-admin $(gb-deployer inspect l1  --workdir ./deploy/{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.proxyAdminAddress) \
     --absolute-prestate 0x03b357b30095022ecbb44ef00d1de19df39cf69ee92a60683a6be2c6f8fe6a3e \
-    --system-config $(gb-deployer inspect l1  --workdir ./{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.systemConfigProxyAddress)
+    --system-config $(gb-deployer inspect l1  --workdir ./deploy/{{ network }}/ {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.systemConfigProxyAddress)
 
 # move some ETH from L admin to L proposer and batcher
 fund value:
@@ -305,7 +305,7 @@ bridge value:
       --rpc-url {{ L1_RPC_URL }} \
       --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
       --value {{ value }} \
-      $(gb-deployer inspect l1  --workdir ./{{ network }} {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.l1StandardBridgeProxyAddress) \
+      $(gb-deployer inspect l1  --workdir ./deploy/{{ network }} {{ L2_CHAIN_ID }} | jq -r .opChainDeployment.l1StandardBridgeProxyAddress) \
       "bridgeETHTo(address _to, uint32 _minGasLimit, bytes calldata _extraData)" \
         $address \
         1000000 \
