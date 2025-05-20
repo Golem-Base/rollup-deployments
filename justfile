@@ -4,6 +4,8 @@ network := ""
 # Chain IDs based on network
 L1_CHAIN_ID := if network == "holesky" {
   "17000"
+} else if network == "altai" {
+  "17000"
 } else if network == "sepolia" {
   "11155111"
 } else if network == "holesky-l3" {
@@ -28,6 +30,8 @@ L2_CHAIN_ID := if network == "holesky" {
   "393530"
 } else if network == "sepolia" {
   "393531"
+} else if network == "altai" {
+  "393532"
 } else if network == "holesky-l3" {
   "934720"
 } else if network == "laika" {
@@ -73,6 +77,8 @@ L1_RPC_URL := if network == "sepolia" {
   env("L1_RPC_URL")
 } else if network == "holesky" {
   env("L1_RPC_URL")
+} else if network == "altai" {
+  env("L1_RPC_URL")
 } else if network == "holesky-l3" {
   env("L2_RPC_URL")
 } else if network == "sepolia-l3" {
@@ -94,6 +100,8 @@ L1_RPC_URL := if network == "sepolia" {
 L2_RPC_URL := if network == "sepolia" {
   env("L2_RPC_URL")
 } else if network == "holesky" {
+  env("L2_RPC_URL")
+} else if network == "altai" {
   env("L2_RPC_URL")
 } else if network == "holesky-l3" {
   env("L3_RPC_URL")
