@@ -39,7 +39,7 @@ L2_CHAIN_ID := if network == "holesky" {
 } else if network == "blackhole" {
   "500002"
 } else if network == "nova" {
-  "550000"
+  "550001"
 } else if network == "kaolin" {
   "600106"
 } else {
