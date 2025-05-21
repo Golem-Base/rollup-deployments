@@ -246,7 +246,7 @@ deploy: bootstrap-superchain bootstrap-implementations bootstrap-proxy apply
 # These steps should not be performed on each deploy, as they create the initial state.
 # NOTE: Changes to these two files should usually be deployed in sync, because rollup.json depends on values in genesis.json.
 # If you run this with an existing L2 chain running in a node, you probably want to delete op-geth's state directory, so that op-geth-init is run again. Otherwise op-node might refuse to start.
-create-genesis:
+create-jsons:
    gb-deployer inspect genesis \
         --workdir ./deploy/{{ network }}/ {{ L2_CHAIN_ID }} \
         > ./deploy/{{ network }}/genesis.json
@@ -255,7 +255,7 @@ create-genesis:
         --workdir ./deploy/{{ network }}/ {{ L2_CHAIN_ID }} \
         > ./deploy/{{ network }}/rollup.json
 
-upload-jsons: create-genesis
+upload-jsons: create-jsons
   mc put ./deploy/{{ network }}/genesis.json gb/golem-base/{{ network }}/genesis.json
   mc put ./deploy/{{ network }}/rollup.json gb/golem-base/{{ network }}/rollup.json
   mc put ./deploy/{{ network }}/state.json gb/golem-base/{{ network }}/state.json
