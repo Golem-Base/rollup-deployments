@@ -89,7 +89,11 @@ upload_batcher_key() {
 
 upload_sequencer_key() {
   local network="$1"
-  # NOTE: we're uploading admin instead of sequencer as is the correct one with permissions
+  upload_key "$network" "sequencer"
+}
+
+upload_admin_key() {
+  local network="$1"
   upload_key "$network" "admin"
 }
 
@@ -117,6 +121,7 @@ upload_all_account_keys() {
   upload_proposer_key "$network"
   upload_batcher_key "$network"
   upload_sequencer_key "$network"
+  upload_admin_key "$network"
   echo "All account keys uploaded successfully!"
 }
 
@@ -184,6 +189,13 @@ main() {
         exit 1
       fi
       upload_sequencer_key "$1"
+      ;;
+    upload-admin-key)
+      if [ $# -ne 1 ]; then
+        echo "Usage: $0 upload-admin-key <network>"
+        exit 1
+      fi
+      upload_admin_key "$1"
       ;;
     generate-jwt-secret)
       if [ $# -ne 1 ]; then
