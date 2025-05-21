@@ -240,7 +240,7 @@ apply:
         --workdir ./deploy/{{ network }}
 
 # Run complete deployment sequence
-deploy: init bootstrap-superchain bootstrap-implementations bootstrap-proxy apply
+deploy: bootstrap-superchain bootstrap-implementations bootstrap-proxy apply
     echo Deployed!
 
 # These steps should not be performed on each deploy, as they create the initial state.
