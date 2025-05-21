@@ -4,11 +4,11 @@ network := ""
 # Chain IDs based on network
 L1_CHAIN_ID := if network == "holesky" {
   "17000"
-} else if network == "altai" {
-  "17000"
 } else if network == "sepolia" {
   "11155111"
 } else if network == "holesky-l3" {
+  "393530"
+} else if network == "altai" {
   "393530"
 } else if network == "sepolia-l3" {
   "393531"
@@ -30,8 +30,6 @@ L2_CHAIN_ID := if network == "holesky" {
   "393530"
 } else if network == "sepolia" {
   "393531"
-} else if network == "altai" {
-  "393532"
 } else if network == "holesky-l3" {
   "934720"
 } else if network == "laika" {
@@ -46,6 +44,8 @@ L2_CHAIN_ID := if network == "holesky" {
   "550001"
 } else if network == "kaolin" {
   "600106"
+} else if network == "altai" {
+  "500002"
 } else {
   error("Invalid network")
 }
@@ -77,8 +77,6 @@ L1_RPC_URL := if network == "sepolia" {
   env("L1_RPC_URL")
 } else if network == "holesky" {
   env("L1_RPC_URL")
-} else if network == "altai" {
-  env("L1_RPC_URL")
 } else if network == "holesky-l3" {
   env("L2_RPC_URL")
 } else if network == "sepolia-l3" {
@@ -92,6 +90,8 @@ L1_RPC_URL := if network == "sepolia" {
 } else if network == "nova" {
   env("L2_RPC_URL")
 } else if network == "kaolin" {
+  env("L2_RPC_URL")
+} else if network == "altai" {
   env("L2_RPC_URL")
 } else {
   error("Invalid network")
@@ -101,8 +101,6 @@ L2_RPC_URL := if network == "sepolia" {
   env("L2_RPC_URL")
 } else if network == "holesky" {
   env("L2_RPC_URL")
-} else if network == "altai" {
-  env("L2_RPC_URL")
 } else if network == "holesky-l3" {
   env("L3_RPC_URL")
 } else if network == "sepolia-l3" {
@@ -116,6 +114,8 @@ L2_RPC_URL := if network == "sepolia" {
 } else if network == "nova" {
   env("L3_RPC_URL")
 } else if network == "kaolin" {
+  env("L3_RPC_URL")
+} else if network == "altai" {
   env("L3_RPC_URL")
 } else { error("Invalid network") }
 
@@ -164,7 +164,7 @@ init: _create_workdir
         --workdir ./deploy/{{ network }} \
         --intent-config-type custom
 
-    # Set chain parameters (with these constants)
+    # Set chain constants
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559DenominatorCanyon" -v 250
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Denominator" -v 50
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Elasticity" -v 6
