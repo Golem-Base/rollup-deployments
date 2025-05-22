@@ -1,5 +1,5 @@
 #!/bin/sh
-set -exu
+set -eu
 
 # Constants
 INIT_DIR="/init"
@@ -30,6 +30,7 @@ check_required_directories() {
 # Initialize execution state if not already done
 initialize_execution_state() {
   if [ ! -d "$GETH_DIR" ]; then
+    echo "Geth state not detected, generating geth state"
     geth init --state.scheme=hash --datadir="$EXECUTION_DIR" "$GENESIS_FILE"
     echo "Execution state initialized successfully"
   else
@@ -42,6 +43,8 @@ setup_initial_config() {
   cp "$ROLLUP_JSON" "$INIT_DIR"
   cp "$CHAIN_ID_FILE" "$INIT_DIR"
   openssl rand -hex 32 >"$JWT_FILE"
+
+  echo "Current chain-id: $(cat $CHAIN_ID_FILE)"
 }
 
 # Extract service IP from pod name
