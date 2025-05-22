@@ -155,74 +155,74 @@ main() {
   shift
 
   case "$command" in
-    generate-all-bootnode-secrets)
-      if [ $# -ne 1 ]; then
-        echo "Usage: $0 generate-all-bootnode-secrets <network>"
-        exit 1
-      fi
-      generate_all_bootnode_secrets "$1"
-      ;;
-    generate-bootnode-secrets)
-      if [ $# -ne 2 ]; then
-        echo "Usage: $0 generate-bootnode-secrets <network> <bootnode_number>"
-        exit 1
-      fi
-      generate_bootnode_secrets "$1" "$2"
-      ;;
-    upload-proposer-key)
-      if [ $# -ne 1 ]; then
-        echo "Usage: $0 upload-proposer-key <network>"
-        exit 1
-      fi
-      upload_proposer_key "$1"
-      ;;
-    upload-batcher-key)
-      if [ $# -ne 1 ]; then
-        echo "Usage: $0 upload-batcher-key <network>"
-        exit 1
-      fi
-      upload_batcher_key "$1"
-      ;;
-    upload-sequencer-key)
-      if [ $# -ne 1 ]; then
-        echo "Usage: $0 upload-sequencer-key <network>"
-        exit 1
-      fi
-      upload_sequencer_key "$1"
-      ;;
-    upload-admin-key)
-      if [ $# -ne 1 ]; then
-        echo "Usage: $0 upload-admin-key <network>"
-        exit 1
-      fi
-      upload_admin_key "$1"
-      ;;
-    generate-jwt-secret)
-      if [ $# -ne 1 ]; then
-        echo "Usage: $0 generate-jwt-secret <network>"
-        exit 1
-      fi
-      generate_jwt_secret "$1"
-      ;;
-    upload-all-account-keys)
-      if [ $# -ne 1 ]; then
-        echo "Usage: $0 upload-all-account-keys <network>"
-        exit 1
-      fi
-      upload_all_account_keys "$1"
-      ;;
-    generate-all-keys)
-      if [ $# -ne 1 ]; then
-        echo "Usage: $0 generate-all-keys <network>"
-        exit 1
-      fi
-      generate_all_keys "$1"
-      ;;
-    *)
-      echo "Unknown command: $command"
-      echo "Usage: $0 <command> [arguments...]"
+  generate-all-bootnode-secrets)
+    if [ $# -ne 1 ]; then
+      echo "Usage: $0 generate-all-bootnode-secrets <network>"
       exit 1
-      ;;
+    fi
+    generate_all_bootnode_secrets "$1"
+    ;;
+  generate-bootnode-secrets)
+    if [ $# -ne 2 ]; then
+      echo "Usage: $0 generate-bootnode-secrets <network> <bootnode_number>"
+      exit 1
+    fi
+    generate_bootnode_secrets "$1" "$2"
+    ;;
+  upload-proposer-key)
+    if [ $# -ne 1 ]; then
+      echo "Usage: $0 upload-proposer-key <network>"
+      exit 1
+    fi
+    upload_proposer_key "$1"
+    ;;
+  upload-batcher-key)
+    if [ $# -ne 1 ]; then
+      echo "Usage: $0 upload-batcher-key <network>"
+      exit 1
+    fi
+    upload_batcher_key "$1"
+    ;;
+  upload-sequencer-key)
+    if [ $# -ne 1 ]; then
+      echo "Usage: $0 upload-sequencer-key <network>"
+      exit 1
+    fi
+    upload_sequencer_key "$1"
+    ;;
+  upload-admin-key)
+    if [ $# -ne 1 ]; then
+      echo "Usage: $0 upload-admin-key <network>"
+      exit 1
+    fi
+    upload_admin_key "$1"
+    ;;
+  generate-jwt-secret)
+    if [ $# -ne 1 ]; then
+      echo "Usage: $0 generate-jwt-secret <network>"
+      exit 1
+    fi
+    generate_jwt_secret "$1"
+    ;;
+  upload-all-account-keys)
+    if [ $# -ne 1 ]; then
+      echo "Usage: $0 upload-all-account-keys <network>"
+      exit 1
+    fi
+    upload_all_account_keys "$1"
+    ;;
+  generate-all-keys)
+    if [ $# -ne 1 ]; then
+      echo "Usage: $0 generate-all-keys <network>"
+      exit 1
+    fi
+    generate_all_keys "$1"
+    ;;
+  *)
+    echo "Unknown command: $command"
+    echo "Usage: $0 <command> [arguments...]"
+    exit 1
+    ;;
   esac
 }
 

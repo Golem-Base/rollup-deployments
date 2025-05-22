@@ -9,7 +9,6 @@ REGISTRY_ORG="golemnetwork"
 REPOSITORY="rollup-deployment"
 IMAGE_NAME=${IMAGE_NAME:-"golem-base-init"}
 
-SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 PRJ_ROOT=${PRJ_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")}
 TEMP_IMAGE_LIST="/tmp/rollup-image-${DEPLOYMENT_NAME:-}.txt"
 
@@ -171,7 +170,7 @@ function build_image {
   # Get chain ID from genesis.json if it exists
   if [ -f "$FULL_DEPLOYMENT_PATH/genesis.json" ]; then
     CHAIN_ID=$(jq -r '.config.chainId' "$FULL_DEPLOYMENT_PATH/genesis.json")
-    echo "$CHAIN_ID" > "$DOCKER_DIR/artifacts/chain-id"
+    echo "$CHAIN_ID" >"$DOCKER_DIR/artifacts/chain-id"
     echo "Using chain ID: $CHAIN_ID"
   else
     echo "Warning: genesis.json not found, chain-id will not be available"
@@ -215,8 +214,8 @@ function build_image {
   print_separator
 
   # Save image names for later use by push
-  echo "${FULL_IMAGE_NAME}" > "$TEMP_IMAGE_LIST"
-  [ "$VERSION" != "latest" ] && echo "${LATEST_IMAGE_NAME}" >> "$TEMP_IMAGE_LIST"
+  echo "${FULL_IMAGE_NAME}" >"$TEMP_IMAGE_LIST"
+  [ "$VERSION" != "latest" ] && echo "${LATEST_IMAGE_NAME}" >>"$TEMP_IMAGE_LIST"
 }
 
 # Function to push the Docker image to the registry

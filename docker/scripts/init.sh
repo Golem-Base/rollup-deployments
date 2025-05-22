@@ -1,11 +1,11 @@
 #!/bin/sh
-set -exuo pipefail
+set -exu
 
 # Constants
 INIT_DIR="/init"
 EXECUTION_DIR="/execution"
 ARTIFACTS_DIR="/artifacts"
-REQUIRED_DIRS=("$INIT_DIR" "$EXECUTION_DIR" "$ARTIFACTS_DIR")
+REQUIRED_DIRS="$INIT_DIR $EXECUTION_DIR $ARTIFACTS_DIR"
 GETH_DIR="/execution/geth"
 GENESIS_FILE="$ARTIFACTS_DIR/genesis.json"
 ROLLUP_JSON="$ARTIFACTS_DIR/rollup.json"
@@ -19,7 +19,7 @@ K8S_NAMESPACE_FILE="/var/run/secrets/kubernetes.io/serviceaccount/namespace"
 
 # Check required directories
 check_required_directories() {
-  for dir in "${REQUIRED_DIRS[@]}"; do
+  for dir in $REQUIRED_DIRS; do
     if [ ! -d "$dir" ]; then
       echo "ERROR: Required directory $dir does not exist"
       exit 1
@@ -41,7 +41,7 @@ initialize_execution_state() {
 setup_initial_config() {
   cp "$ROLLUP_JSON" "$INIT_DIR"
   cp "$CHAIN_ID_FILE" "$INIT_DIR"
-  openssl rand -hex 32 > "$JWT_FILE"
+  openssl rand -hex 32 >"$JWT_FILE"
 }
 
 # Extract service IP from pod name
@@ -64,7 +64,7 @@ extract_service_ip() {
   if getent hosts "$service_fqdn" >/dev/null 2>&1; then
     IP=$(getent hosts "$service_fqdn" | awk '{ print $1 }')
     if [ -n "${IP:-}" ]; then
-      echo "$IP" > "$SERVICE_IP_FILE"
+      echo "$IP" >"$SERVICE_IP_FILE"
       echo "Found service for pod at ip: $(cat "$SERVICE_IP_FILE") from service fqdn: $service_fqdn"
     else
       echo "Failed to find IP from POD_BASE_NAME: $POD_BASE_NAME"
@@ -90,14 +90,14 @@ setup_peer_config() {
   fi
 
   PEERS_JSON=$(jq -r --arg pod_base_name "$POD_BASE_NAME" '.[] | select(.name != $pod_base_name)' "$PEERS_JSON_PATH")
-  echo -e "Found peers: \n$PEERS_JSON\n"
+  printf "Found peers: \n%s\n\n" "$PEERS_JSON"
 
   # Configure op-node static peers
   echo "$PEERS_JSON" |
     jq -r ".consensus" |
     tr '\n' ',' |
     sed 's/,$//' \
-      > "$OP_NODE_STATIC_PEERS_FILE"
+      >"$OP_NODE_STATIC_PEERS_FILE"
 
   # Configure geth static peers
   EXECUTION_PEERS=$(echo "$PEERS_JSON" |
@@ -106,7 +106,7 @@ setup_peer_config() {
     sed 's/$/",/' |
     sed '$s/,$//')
 
-  cat > "$GETH_CONFIG_FILE" <<EOF
+  cat >"$GETH_CONFIG_FILE" <<EOF
 [Node.P2P]
 StaticNodes = [
 $EXECUTION_PEERS
