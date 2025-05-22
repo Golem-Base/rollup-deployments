@@ -45,7 +45,7 @@ L2_CHAIN_ID := if network == "holesky" {
 } else if network == "kaolin" {
   "600106"
 } else if network == "altda" {
-  "500002"
+  "500003"
 } else {
   error("Invalid network")
 }
@@ -246,7 +246,7 @@ deploy: bootstrap-superchain bootstrap-implementations bootstrap-proxy apply
 # These steps should not be performed on each deploy, as they create the initial state.
 # NOTE: Changes to these two files should usually be deployed in sync, because rollup.json depends on values in genesis.json.
 # If you run this with an existing L2 chain running in a node, you probably want to delete op-geth's state directory, so that op-geth-init is run again. Otherwise op-node might refuse to start.
-create-jsons:
+create-jsons: deploy
    gb-deployer inspect genesis \
         --workdir ./deploy/{{ network }}/ {{ L2_CHAIN_ID }} \
         > ./deploy/{{ network }}/genesis.json

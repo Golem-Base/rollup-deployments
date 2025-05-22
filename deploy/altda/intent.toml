@@ -10,17 +10,17 @@ useInterop = false
   eip1559Denominator = 50
   eip1559DenominatorCanyon = 250
   eip1559Elasticity = 6
-  id = '0x000000000000000000000000000000000000000000000000000000000007a122'
+  id = '0x000000000000000000000000000000000000000000000000000000000007a123'
   l1FeeVaultRecipient = '0xC2B00eC0C6E22a2879B704FB3bB1FE451c084639'
   sequencerFeeVaultRecipient = '0xC2B00eC0C6E22a2879B704FB3bB1FE451c084639'
 
   [chains.dangerousAltDAConfig]
-    useAltDA = true
-    daCommitmentType = 'GenericCommitment'
-    daChallengeWindow = 3600 # 1hr with 1s block time
-    daResolveWindow = 3600 # 1hr with 1s block time
     daBondSize = 10
+    daChallengeWindow = 3600
+    daCommitmentType = 'KeccakCommitment'
+    daResolveWindow = 3600
     daResolverRefundPercentage = 100
+    useAltDA = true
 
   [chains.roles]
     batcher = '0x2B3940Be9a8c22EaE5e0d2eefB0FA22734f886b9'
