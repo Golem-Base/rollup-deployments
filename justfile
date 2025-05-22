@@ -8,7 +8,7 @@ L1_CHAIN_ID := if network == "holesky" {
   "11155111"
 } else if network == "holesky-l3" {
   "393530"
-} else if network == "altai" {
+} else if network == "altda" {
   "393530"
 } else if network == "sepolia-l3" {
   "393531"
@@ -44,7 +44,7 @@ L2_CHAIN_ID := if network == "holesky" {
   "550001"
 } else if network == "kaolin" {
   "600106"
-} else if network == "altai" {
+} else if network == "altda" {
   "500002"
 } else {
   error("Invalid network")
@@ -91,7 +91,7 @@ L1_RPC_URL := if network == "sepolia" {
   env("L2_RPC_URL")
 } else if network == "kaolin" {
   env("L2_RPC_URL")
-} else if network == "altai" {
+} else if network == "altda" {
   env("L2_RPC_URL")
 } else {
   error("Invalid network")
@@ -115,7 +115,7 @@ L2_RPC_URL := if network == "sepolia" {
   env("L3_RPC_URL")
 } else if network == "kaolin" {
   env("L3_RPC_URL")
-} else if network == "altai" {
+} else if network == "altda" {
   env("L3_RPC_URL")
 } else { error("Invalid network") }
 
