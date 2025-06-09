@@ -1,14 +1,14 @@
 {
   "genesis": {
     "l1": {
-      "hash": "0xab19fc9a4a5675b55a8c2202768dca71d68ca14652087eb10aac07c41350337e",
-      "number": 1998565
+      "hash": "0xc95235074062cea88e3cb717515fa1b5b86ae8097b30c8fba803a171e9d87f59",
+      "number": 2204367
     },
     "l2": {
-      "hash": "0x86e1081a43e5e1bf203245cdfa1698a560aeb0fd56c7c4040c8db7b40b1df07e",
+      "hash": "0x9f5da452533650d170dc957075e116b08e5d4170754f088df80b2aee0ab16717",
       "number": 0
     },
-    "l2_time": 1749049970,
+    "l2_time": 1749461574,
     "system_config": {
       "batcherAddr": "0x2b3940be9a8c22eae5e0d2eefb0fa22734f886b9",
       "overhead": "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -22,7 +22,7 @@
   "seq_window_size": 3600,
   "channel_timeout": 300,
   "l1_chain_id": 393530,
-  "l2_chain_id": 500003,
+  "l2_chain_id": 500004,
   "regolith_time": 0,
   "canyon_time": 0,
   "delta_time": 0,
@@ -30,15 +30,15 @@
   "fjord_time": 0,
   "granite_time": 0,
   "holocene_time": 0,
-  "batch_inbox_address": "0x002973bb83d745cbb15c9d0a9e8ac8e76ffeb8ff",
-  "deposit_contract_address": "0x29ee3c4a1f26eb563b2f961b0319902c74ecdc91",
-  "l1_system_config_address": "0xc055eef1d2632f5a7e1dd56444128852bf1d5bd4",
-  "protocol_versions_address": "0x2a37d7461a2bf87543784ce867366f8c330c90fa",
+  "batch_inbox_address": "0x000d32c4b61a4d49866474c7182111e6c7a44d03",
+  "deposit_contract_address": "0x113fdaeb146ae18bbc471c7136cad0e7fbe6fc13",
+  "l1_system_config_address": "0x05842e4e4cc4c4f305887283e56baf305bc00edd",
+  "protocol_versions_address": "0xa80b8b10358d9a1190d2b07e7615836ea16b978c",
   "alt_da": {
-    "da_challenge_contract_address": "0xeb4b303f519b8bfc91711fdcc772bf234dcb0da2",
+    "da_challenge_contract_address": "0x5560e4497f0159fa584b2046314c11a25d5b2f1e",
     "da_commitment_type": "KeccakCommitment",
-    "da_challenge_window": 3600,
-    "da_resolve_window": 3600
+    "da_challenge_window": 43200,
+    "da_resolve_window": 43200
   },
   "chain_op_config": {
     "eip1559Elasticity": 6,

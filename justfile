@@ -45,7 +45,7 @@ L2_CHAIN_ID := if network == "holesky" {
 } else if network == "kaolin" {
   "600106"
 } else if network == "altda" {
-  "500003"
+  "500004"
 } else {
   error("Invalid network")
 }
