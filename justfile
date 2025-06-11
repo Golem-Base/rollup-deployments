@@ -45,7 +45,7 @@ L2_CHAIN_ID := if network == "holesky" {
 } else if network == "kaolin" {
   "600106"
 } else if network == "altda" {
-  "500005"
+  "500011"
 } else {
   error("Invalid network")
 }
@@ -289,8 +289,9 @@ fund value:
   done
 
 
-# TODO: should error if balance doesn't update by correct amount
 # deposit funds from L to L+1 accounts of admin (for withdrawal testing), batcher, proposer
+#
+# TODO: should error if balance doesn't update by correct amount
 bridge value:
   #!/usr/bin/env bash
   set -euo pipefail
