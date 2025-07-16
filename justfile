@@ -45,7 +45,7 @@ L2_CHAIN_ID := if network == "holesky" {
 } else if network == "kaolin" {
   "600106"
 } else if network == "altda" {
-  "500011"
+  "500014"
 } else {
   error("Invalid network")
 }
@@ -297,11 +297,10 @@ bridge value:
   set -euo pipefail
   set -x
 
-  for var in GS_ADMIN_ADDRESS GS_BATCHER_ADDRESS GS_PROPOSER_ADDRESS; do
+  for var in GS_ADMIN_ADDRESS; do
     address="${!var}"
 
     cast send \
-      --quiet \
       --gas-limit 2000000 \
       --rpc-url {{ L1_RPC_URL }} \
       --private-key {{ GS_ADMIN_PRIVATE_KEY }} \
