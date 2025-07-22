@@ -45,7 +45,7 @@ L2_CHAIN_ID := if network == "holesky" {
 } else if network == "kaolin" {
   "600106"
 } else if network == "altda" {
-  "500014"
+  "500018"
 } else {
   error("Invalid network")
 }
@@ -169,6 +169,13 @@ init: _create_workdir
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Denominator" -v 50
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Elasticity" -v 6
 
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].dangerousAltDAConfig.daBondSize" -v 10
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].dangerousAltDAConfig.daChallengeWindow" -v 43200
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].dangerousAltDAConfig.daResolveWindow" -v 43200
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].dangerousAltDAConfig.daCommitmentType" -v "KeccakCommitment"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].dangerousAltDAConfig.daResolverRefundPercentage" -v 100
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t bool "chains.[0].dangerousAltDAConfig.useAltDA" -v true
+
     # Set contract locators
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string -v "{{ L1_ARTIFACTS_LOCATOR }}" "l1ContractsLocator"
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string -v "{{ L2_ARTIFACTS_LOCATOR }}" "l2ContractsLocator"
@@ -240,7 +247,7 @@ apply:
         --workdir ./deploy/{{ network }}
 
 # Run complete deployment sequence
-deploy: bootstrap-superchain bootstrap-implementations bootstrap-proxy apply
+deploy: init bootstrap-superchain bootstrap-implementations bootstrap-proxy apply
     echo Deployed!
 
 # These steps should not be performed on each deploy, as they create the initial state.

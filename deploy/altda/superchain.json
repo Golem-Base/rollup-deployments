@@ -1,8 +1,8 @@
 {
-  "SuperchainProxyAdmin": "0x4c066dafda618a64c73e9949f9f40b197c34d37b",
+  "SuperchainProxyAdmin": "0x100c49c6bc73219d63f55ea75f404fe55ab90e2e",
   "SuperchainConfigImpl": "0x4da82a327773965b8d4d85fa3db8249b387458e7",
-  "SuperchainConfigProxy": "0x3d67c512aa4e666f37078618c34366d128b74e97",
+  "SuperchainConfigProxy": "0x14fa2c3e047a7b9ca2a1448d537ab07b23121e98",
   "ProtocolVersionsImpl": "0x37e15e4d6dffa9e5e320ee1ec036922e563cb76c",
-  "ProtocolVersionsProxy": "0x5671d349ac67ac6fb666bdb9300d44d176538b6a"
+  "ProtocolVersionsProxy": "0x8fe1041706610c024b5be63c1b06028b5acd172b"
 }
 
