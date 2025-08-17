@@ -45,7 +45,7 @@ L2_CHAIN_ID := if network == "holesky" {
 } else if network == "kaolin" {
   "600106"
 } else if network == "altda" {
-  "500018"
+  "500023"
 } else {
   error("Invalid network")
 }
@@ -170,9 +170,9 @@ init: _create_workdir
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].eip1559Elasticity" -v 6
 
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].dangerousAltDAConfig.daBondSize" -v 10
-    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].dangerousAltDAConfig.daChallengeWindow" -v 43200
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].dangerousAltDAConfig.daChallengeWindow" -v 30
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].dangerousAltDAConfig.daResolveWindow" -v 43200
-    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].dangerousAltDAConfig.daCommitmentType" -v "KeccakCommitment"
+    dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t string "chains.[0].dangerousAltDAConfig.daCommitmentType" -v "GenericCommitment"
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t int "chains.[0].dangerousAltDAConfig.daResolverRefundPercentage" -v 100
     dasel put -f ./deploy/{{ network }}/intent.toml -r toml -t bool "chains.[0].dangerousAltDAConfig.useAltDA" -v true
 
@@ -266,6 +266,8 @@ upload-jsons: create-jsons
   mc put ./deploy/{{ network }}/genesis.json gb/golem-base/{{ network }}/genesis.json
   mc put ./deploy/{{ network }}/rollup.json gb/golem-base/{{ network }}/rollup.json
   mc put ./deploy/{{ network }}/state.json gb/golem-base/{{ network }}/state.json
+
+all: upload-jsons
 
 # for how to generate the absolute prestate, see op-program's README.
 validate:
