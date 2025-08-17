@@ -45,7 +45,7 @@ L2_CHAIN_ID := if network == "holesky" {
 } else if network == "kaolin" {
   "600106"
 } else if network == "altda" {
-  "500023"
+  "500024"
 } else {
   error("Invalid network")
 }
@@ -266,8 +266,6 @@ upload-jsons: create-jsons
   mc put ./deploy/{{ network }}/genesis.json gb/golem-base/{{ network }}/genesis.json
   mc put ./deploy/{{ network }}/rollup.json gb/golem-base/{{ network }}/rollup.json
   mc put ./deploy/{{ network }}/state.json gb/golem-base/{{ network }}/state.json
-
-all: upload-jsons
 
 # for how to generate the absolute prestate, see op-program's README.
 validate:
